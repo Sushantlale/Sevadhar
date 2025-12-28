@@ -30,7 +30,7 @@ export default function LandingScreen() {
       <View style={styles.content}>
         <View style={styles.logoCircle}>
            {/* Replace with your logo file in assets/images/my-logo.png */}
-           <Image source={require('../assets/images/my-logo.png')} style={{width: 80, height: 80}} resizeMode="contain" />
+           <Image source={require('../assets/images/logo.png')} style={{width: 80, height: 80}} resizeMode="contain" />
         </View>
 
         <Text style={styles.title}>

@@ -27,10 +27,17 @@ import {
 // Mock localities from your contexts/AreaContext
 const localities = [
   { id: '1', name: 'Vinaynagar', city: 'Khopoli' },
-  { id: '2', name: 'Mogalwadi', city: 'Solapur' },
+  { id: '2', name: 'Mogalwadi', city: 'Khopoli' },
   { id: '3', name: 'Bazaar Peth', city: 'Khopoli' },
   { id: '4', name: 'Shilphata', city: 'Khopoli' },
-  { id: '5', name: 'Siddheshwar Peth', city: 'Solapur' },
+  { id: '5', name: 'Pathankar Chowk', city: 'Khopoli' },
+  { id: '6', name: 'Laxminagar', city: 'Khopoli' },
+  { id: '7', name: 'Vihari', city: 'Khopoli' },
+  { id: '8', name: 'Sri Swami Samarth Nagar', city: 'Khopoli' },
+  { id: '9', name: 'Shri Ram Nagar', city: 'Khopoli' },
+  { id: '10', name: 'Zenith Colony', city: 'Khopoli' },
+  { id: '11', name: 'Vardhman Nagar', city: 'Khopoli' },
+  { id: '12', name: 'Bhanwaj', city: 'Khopoli' },
 ];
 
 export default function CustomerSignup() {
@@ -90,7 +97,7 @@ export default function CustomerSignup() {
     setFormData({ ...formData, area: "Current Location (Fetching...)" });
     setModalVisible(false);
     // Simulation of reverse geocoding
-    setTimeout(() => setFormData(prev => ({...prev, area: "Solapur Area (GPS)"})), 1500);
+    setTimeout(() => setFormData(prev => ({...prev, area: "Khopoli Area (GPS)"})), 1500);
   };
 
   const handleSubmit = () => {
