@@ -77,3 +77,4 @@ const styles = StyleSheet.create({
   footerText: { color: '#666' },
   linkText: { color: '#FF6B00', fontWeight: 'bold' }
 });
+

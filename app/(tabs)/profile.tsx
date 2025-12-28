@@ -269,3 +269,4 @@ const styles = StyleSheet.create({
   menuItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 15, borderBottomWidth: 1, borderBottomColor: '#F3F4F6' },
   menuItemText: { fontSize: 16, fontWeight: '500', marginLeft: 15, color: '#111827' }
 });
+
