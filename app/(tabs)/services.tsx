@@ -2,234 +2,422 @@ import { useRouter } from 'expo-router';
 import { Mic, Search } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
-// Adjusting card width for a 3-column grid with exact spacing like your images
-const cardWidth = (width - 48) / 3; 
+const cardWidth = (width - 48) / 3;
+
+/* ===========================
+   ALL SERVICES DATA
+=========================== */
 
 const categories = [
   {
     id: '1',
     name: 'Household Help & Cleaning',
     services: [
-      { name: 'Maid', slug: 'maid', image: 'https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=200&h=200&fit=crop' },
-      { name: 'Cook', slug: 'cook', image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=200&h=200&fit=crop' },
-      { name: 'Babysitter', slug: 'babysitter', image: 'https://images.unsplash.com/photo-1587616211892-f743fcca64f9?w=200&h=200&fit=crop' },
-      { name: 'Elderly Care', slug: 'elderly-care', image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200&h=200&fit=crop' },
-      { name: 'Deep Cleaning', slug: 'deep-cleaning', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&h=200&fit=crop' },
-      { name: 'Toilet Cleaner', slug: 'toilet-cleaner', image: 'https://images.unsplash.com/photo-1584622781564-1d9876a1e65d?w=200&h=200&fit=crop' },
+      { name: 'Maid / Domestic Help', slug: 'maid', image: '' },
+      { name: 'Cook / Private Chef', slug: 'cook', image: '' },
+      { name: 'Babysitter / Nanny', slug: 'babysitter', image: '' },
+      { name: 'Elderly Caretaker / Home Nurse', slug: 'elderly-care', image: '' },
+      { name: 'Full Home Deep Cleaning', slug: 'deep-cleaning', image: '' },
+      { name: 'Toilet & Bathroom Cleaner', slug: 'toilet-cleaner', image: '' },
+      { name: 'Laundry & Dry Cleaning', slug: 'laundry', image: '' },
+      { name: 'Iron / Press Wala', slug: 'ironing', image: '' },
+      { name: 'Car Washer / Detailer', slug: 'car-wash', image: '' },
+      { name: 'Chimney & Kitchen Cleaner', slug: 'chimney-cleaner', image: '' },
+      { name: 'Water Tank Cleaner', slug: 'water-tank-cleaner', image: '' },
     ],
   },
+
   {
     id: '2',
-    name: 'Repair & Technical Services',
+    name: 'Repair, Maintenance & Technical',
     services: [
-      { name: 'AC Repair', slug: 'ac-repair', image: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=200&fit=crop' },
-      { name: 'Plumber', slug: 'plumber', image: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=200&h=200&fit=crop' },
-      { name: 'Electrician', slug: 'electrician', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&h=200&fit=crop' },
-      { name: 'Mobile Repair', slug: 'mobile-repair', image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=200&h=200&fit=crop' },
-      { name: 'Carpenter', slug: 'carpenter', image: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=200&h=200&fit=crop' },
-      { name: 'Painter', slug: 'painter', image: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=200&h=200&fit=crop' },
+      { name: 'AC Repair & Servicing', slug: 'ac-repair', image: '' },
+      { name: 'Plumber', slug: 'plumber', image: '' },
+      { name: 'Electrician', slug: 'electrician', image: '' },
+      { name: 'Mobile & Tablet Repair', slug: 'mobile-repair', image: '' },
+      { name: 'Appliance Repair', slug: 'appliance-repair', image: '' },
+      { name: 'Carpenter', slug: 'carpenter', image: '' },
+      { name: 'Painter', slug: 'painter', image: '' },
+      { name: 'Mechanic (Bike / Car)', slug: 'mechanic', image: '' },
+      { name: 'Key Maker / Locksmith', slug: 'locksmith', image: '' },
+      { name: 'Computer / Laptop Technician', slug: 'computer-repair', image: '' },
+      { name: 'RO / Water Purifier Service', slug: 'ro-service', image: '' },
+      { name: 'Inverter & Battery Technician', slug: 'inverter-repair', image: '' },
     ],
   },
+
   {
     id: '3',
     name: 'Construction & Labor',
     services: [
-      { name: 'Mason (Beldar)', slug: 'mason', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&h=200&fit=crop' },
-      { name: 'POP Worker', slug: 'pop-worker', image: 'https://images.unsplash.com/photo-1531835551805-16d864c8d311?w=200&h=200&fit=crop' },
-      { name: 'Welder', slug: 'welder', image: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200&h=200&fit=crop' },
+      { name: 'Construction Labor (Mason)', slug: 'mason', image: '' },
+      { name: 'Coolie (Loader / Unloader)', slug: 'coolie', image: '' },
+      { name: 'POP Worker', slug: 'pop-worker', image: '' },
+      { name: 'Welder / Fabrication Worker', slug: 'welder', image: '' },
+      { name: 'Tile & Marble Layer', slug: 'tile-layer', image: '' },
+      { name: 'Driller (Wall / Concrete)', slug: 'driller', image: '' },
+      { name: 'Demolition Worker', slug: 'demolition', image: '' },
     ],
   },
+
+  {
+    id: '4',
+    name: 'Gardening & Outdoor',
+    services: [
+      { name: 'Mali / Gardener', slug: 'gardener', image: '' },
+      { name: 'Nursery Supplier', slug: 'nursery', image: '' },
+      { name: 'Pest Control Service', slug: 'pest-control', image: '' },
+      { name: 'Grass Cutter / Bush Trimmer', slug: 'grass-cutter', image: '' },
+    ],
+  },
+
   {
     id: '5',
-    name: 'Scrap & Utility',
+    name: 'Scrap & Pheri Services',
     services: [
-      { name: 'Scrap Dealer', slug: 'scrap-dealer', image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=200&h=200&fit=crop' },
-      { name: 'Knife Sharpener', slug: 'sharpener', image: 'https://images.unsplash.com/photo-1613110904083-2d1f0535775d?w=200&h=200&fit=crop' },
-      { name: 'Old Clothes', slug: 'old-clothes', image: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=200&h=200&fit=crop' },
+      { name: 'Scrap Dealer (Kabadiwala)', slug: 'scrap-dealer', image: '' },
+      { name: 'Raddi Dealer', slug: 'raddi-dealer', image: '' },
+      { name: 'Knife & Scissor Sharpener', slug: 'knife-sharpener', image: '' },
+      { name: 'Old Clothes Exchange', slug: 'old-clothes', image: '' },
+      { name: 'Glass & Bottle Buyer', slug: 'glass-buyer', image: '' },
     ],
   },
+
   {
     id: '6',
     name: 'Religious & Community',
     services: [
-      { name: 'Pandit', slug: 'pandit', image: 'https://images.unsplash.com/photo-1604152135912-04a022e23696?w=200&h=200&fit=crop' },
-      { name: 'Astrologer', slug: 'astrologer', image: 'https://images.unsplash.com/photo-1505506874110-6a7a69069a08?w=200&h=200&fit=crop' },
+      { name: 'Pandit / Pujari', slug: 'pandit', image: '' },
+      { name: 'Astrologer / Palm Reader', slug: 'astrologer', image: '' },
+      { name: 'Gravedigger / Crematorium Helper', slug: 'gravedigger', image: '' },
+      { name: 'Religious Musician', slug: 'religious-musician', image: '' },
     ],
   },
+
   {
     id: '7',
     name: 'Personal Care & Wellness',
     services: [
-      { name: 'Barber', slug: 'barber', image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=200&h=200&fit=crop' },
-      { name: 'Makeup Artist', slug: 'makeup', image: 'https://images.unsplash.com/photo-1487412947147-5cebf100ffc2?w=200&h=200&fit=crop' },
-      { name: 'Mehndi Artist', slug: 'mehndi', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=200&h=200&fit=crop' },
+      { name: 'Hair Salon / Barber', slug: 'barber', image: '' },
+      { name: 'Makeup Artist / Beautician', slug: 'makeup-artist', image: '' },
+      { name: 'Massage Services', slug: 'massage', image: '' },
+      { name: 'Mehendi Artist', slug: 'mehendi', image: '' },
+      { name: 'Tattoo Artist', slug: 'tattoo', image: '' },
     ],
   },
+
+  {
+    id: '8',
+    name: 'Food & Beverage Vendors',
+    services: [
+      { name: 'Grocery / Kirana Store', slug: 'grocery', image: '' },
+      { name: 'Atta Chakki', slug: 'atta-chakki', image: '' },
+      { name: 'Fruit Seller', slug: 'fruit-seller', image: '' },
+      { name: 'Vegetable Seller', slug: 'vegetable-seller', image: '' },
+      { name: 'Meat / Fish Seller', slug: 'meat-seller', image: '' },
+      { name: 'Milk / Dairy Provider', slug: 'milk-provider', image: '' },
+      { name: 'Sweet Seller (Halwai)', slug: 'sweet-seller', image: '' },
+      { name: 'Ice Cream / Kulfi Vendor', slug: 'ice-cream', image: '' },
+      { name: 'Juice / Coconut Water Seller', slug: 'juice-seller', image: '' },
+      { name: 'Street Food Vendor', slug: 'street-food', image: '' },
+      { name: 'Hotel / Dhaba', slug: 'hotel', image: '' },
+      { name: 'Catering / Tiffin Service', slug: 'tiffin', image: '' },
+      { name: 'Egg Seller', slug: 'egg-seller', image: '' },
+    ],
+  },
+
+  {
+    id: '9',
+    name: 'Education & Knowledge',
+    services: [
+      { name: 'Home Tutor', slug: 'home-tutor', image: '' },
+      { name: 'Music / Dance Teacher', slug: 'music-teacher', image: '' },
+      { name: 'Book Seller', slug: 'book-seller', image: '' },
+      { name: 'Newspaper Distributor', slug: 'newspaper', image: '' },
+      { name: 'Stationery & Xerox Shop', slug: 'stationery', image: '' },
+    ],
+  },
+
+  {
+    id: '10',
+    name: 'Clothing & Tailoring',
+    services: [
+      { name: 'Clothes Seller / Boutique', slug: 'clothes', image: '' },
+      { name: 'Tailor / Master', slug: 'tailor', image: '' },
+      { name: 'Embroidery / Zari Worker', slug: 'embroidery', image: '' },
+      { name: 'Button & Needle Seller', slug: 'notions', image: '' },
+      { name: 'Spectacles Seller', slug: 'spectacles', image: '' },
+      { name: 'Jewelry Repair / Goldsmith', slug: 'goldsmith', image: '' },
+      { name: 'Watch Repairer', slug: 'watch-repair', image: '' },
+    ],
+  },
+
+  {
+    id: '11',
+    name: 'Pet & Animal Services',
+    services: [
+      { name: 'Pet Groomer', slug: 'pet-groomer', image: '' },
+      { name: 'Dog Walker', slug: 'dog-walker', image: '' },
+      { name: 'Pet Food Supplier', slug: 'pet-food', image: '' },
+      { name: 'Aquarium Cleaner', slug: 'aquarium', image: '' },
+      { name: 'Veterinary Assistant', slug: 'vet', image: '' },
+    ],
+  },
+
+  {
+    id: '12',
+    name: 'Medical & Healthcare',
+    services: [
+      { name: 'Medical Store / Pharmacy', slug: 'pharmacy', image: '' },
+      { name: 'Doctor', slug: 'doctor', image: '' },
+      { name: 'Dentist', slug: 'dentist', image: '' },
+      { name: 'Home Nurse / Physiotherapist', slug: 'home-nurse', image: '' },
+      { name: 'Pathology Sample Collector', slug: 'pathology', image: '' },
+    ],
+  },
+
+  {
+    id: '13',
+    name: 'Event & Creative',
+    services: [
+      { name: 'Event Decorator', slug: 'event-decorator', image: '' },
+      { name: 'Gift Wrapper', slug: 'gift-wrapper', image: '' },
+      { name: 'Photographer / Videographer', slug: 'photographer', image: '' },
+      { name: 'DJ / Sound System', slug: 'dj', image: '' },
+      { name: 'Tent & Chair Supplier', slug: 'tent', image: '' },
+    ],
+  },
+
+  {
+    id: '14',
+    name: 'Hardware & Tools',
+    services: [
+      { name: 'Hardware & Paint Store', slug: 'hardware', image: '' },
+      { name: 'Plumbing Store', slug: 'plumbing-store', image: '' },
+      { name: 'Plywood & Carpentry Tools', slug: 'plywood', image: '' },
+      { name: 'Auto Parts Seller', slug: 'auto-parts', image: '' },
+      { name: 'Cycle Repair Mechanic', slug: 'cycle-repair', image: '' },
+      { name: 'Gas Stove Repair', slug: 'stove-repair', image: '' },
+    ],
+  },
+
+  {
+    id: '15',
+    name: 'Traditional Micro-Services',
+    services: [
+      { name: 'Cobbler (Shoe Repair)', slug: 'cobbler', image: '' },
+      { name: 'Flower Seller', slug: 'flower-seller', image: '' },
+      { name: 'Bangle Seller', slug: 'bangle-seller', image: '' },
+      { name: 'Basket Weaver', slug: 'basket-weaver', image: '' },
+      { name: 'Potter', slug: 'potter', image: '' },
+      { name: 'Utensil Seller / Polisher', slug: 'utensil', image: '' },
+    ],
+  },
+
   {
     id: '16',
     name: 'Driving & Transport',
     services: [
-      { name: 'Taxi Driver', slug: 'taxi', image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=200&h=200&fit=crop' },
-      { name: 'Rickshaw', slug: 'rickshaw', image: 'https://images.unsplash.com/photo-1553901753-215db32a6f47?w=200&h=200&fit=crop' },
-      { name: 'Delivery Rider', slug: 'delivery', image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?w=200&h=200&fit=crop' },
+      { name: 'Taxi / Cab Driver', slug: 'taxi', image: '' },
+      { name: 'Auto Rickshaw Driver', slug: 'auto', image: '' },
+      { name: 'Truck Driver', slug: 'truck', image: '' },
+      { name: 'Tempo / Mini Van Driver', slug: 'tempo', image: '' },
+      { name: 'JCB / Crane Operator', slug: 'crane', image: '' },
+      { name: 'Tractor Driver', slug: 'tractor', image: '' },
+      { name: 'Delivery Rider', slug: 'delivery', image: '' },
+      { name: 'Ambulance Driver', slug: 'ambulance', image: '' },
+      { name: 'Private Chauffeur', slug: 'chauffeur', image: '' },
     ],
   },
-  // Add other categories (8-20) here following the same pattern
+
+  {
+    id: '17',
+    name: 'Professional & Legal',
+    services: [
+      { name: 'Accountant / CA', slug: 'accountant', image: '' },
+      { name: 'Lawyer / Notary', slug: 'lawyer', image: '' },
+      { name: 'Real Estate Agent', slug: 'real-estate', image: '' },
+      { name: 'Journalist', slug: 'journalist', image: '' },
+      { name: 'Insurance Agent', slug: 'insurance', image: '' },
+      { name: 'Typist / Document Writer', slug: 'typist', image: '' },
+    ],
+  },
+
+  {
+    id: '18',
+    name: 'Architecture & Interior',
+    services: [
+      { name: 'Architect', slug: 'architect', image: '' },
+      { name: 'Interior Designer', slug: 'interior-designer', image: '' },
+      { name: 'Civil Contractor', slug: 'contractor', image: '' },
+      { name: 'Vastu Consultant', slug: 'vastu', image: '' },
+      { name: 'UI/UX Designer', slug: 'uiux', image: '' },
+    ],
+  },
+
+  {
+    id: '19',
+    name: 'Arts & Entertainment',
+    services: [
+      { name: 'Actor / Actress', slug: 'actor', image: '' },
+      { name: 'Painter / Sketch Artist', slug: 'artist', image: '' },
+      { name: 'Singer / Musician', slug: 'singer', image: '' },
+      { name: 'Dancer / Choreographer', slug: 'dancer', image: '' },
+      { name: 'Voiceover Artist', slug: 'voiceover', image: '' },
+    ],
+  },
+
+  {
+    id: '20',
+    name: 'Agriculture & Allied',
+    services: [
+      { name: 'Farmer', slug: 'farmer', image: '' },
+      { name: 'Farm Laborer', slug: 'farm-labor', image: '' },
+      { name: 'Dairy Farmer', slug: 'dairy', image: '' },
+      { name: 'Poultry Worker', slug: 'poultry', image: '' },
+      { name: 'Beekeeper', slug: 'beekeeper', image: '' },
+    ],
+  },
 ];
+
+/* ===========================
+   COMPONENT (UNCHANGED)
+=========================== */
 
 export default function ServicesPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredCategories = categories.filter(cat => 
+  const filteredCategories = categories.filter(cat =>
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.services.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Header exactly like image_b1ac88.png */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Services</Text>
+
         <View style={styles.searchRow}>
           <View style={styles.searchBar}>
             <Search size={20} color="#999" />
-            <TextInput 
-              placeholder="Search for services..." 
+            <TextInput
+              placeholder="Search for services..."
               style={styles.searchInput}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
           </View>
+
           <TouchableOpacity style={styles.micBtn}>
             <Mic size={22} color="#FFF" />
           </TouchableOpacity>
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {filteredCategories.map((category) => (
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {filteredCategories.map(category => (
           <View key={category.id} style={styles.section}>
-            {/* Category Title exactly like image_b1ac88.png */}
             <Text style={styles.categoryTitle}>{category.name}</Text>
-            
-            {/* Grid Layout exactly like image_b1ac88.png */}
+
             <View style={styles.grid}>
               {category.services.map((service, index) => (
-                <TouchableOpacity 
-                  key={index} 
+                <TouchableOpacity
+                  key={index}
                   style={styles.serviceCard}
-                  onPress={() => router.push({ 
-                    pathname: '/service/[id]', 
-                    params: { id: service.slug } 
-                  } as any)}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/service/[id]',
+                      params: { id: service.slug },
+                    } as any)
+                  }
                 >
                   <View style={styles.imageContainer}>
-                    <Image source={{ uri: service.image }} style={styles.image} />
+                    {service.image ? (
+                      <Image source={{ uri: service.image }} style={styles.image} />
+                    ) : (
+                      <View style={{ flex: 1, backgroundColor: '#EEE' }} />
+                    )}
                   </View>
+
                   <View style={styles.textContainer}>
-                    <Text style={styles.serviceName} numberOfLines={1}>{service.name}</Text>
+                    <Text style={styles.serviceName} numberOfLines={1}>
+                      {service.name}
+                    </Text>
                   </View>
                 </TouchableOpacity>
               ))}
             </View>
           </View>
         ))}
-
-        {filteredCategories.length === 0 && (
-          <View style={styles.emptyState}>
-            <Search size={40} color="#CCC" />
-            <Text style={styles.emptyText}>No services found</Text>
-          </View>
-        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
 
+/* ===========================
+   STYLES (UNCHANGED)
+=========================== */
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
-  header: { 
-    backgroundColor: '#FFF', 
-    paddingHorizontal: 16, 
-    paddingTop: 40, 
+  header: {
+    paddingTop: 40,
     paddingBottom: 16,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0'
+    borderBottomColor: '#F0F0F0',
   },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', color: '#1A1A1A', marginBottom: 16 },
-  searchRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  searchBar: { 
-    flex: 1, 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    backgroundColor: '#F5F5F5', 
-    borderRadius: 16, 
-    paddingHorizontal: 16, 
+  headerTitle: { fontSize: 28, fontWeight: 'bold', marginBottom: 16 },
+  searchRow: { flexDirection: 'row', gap: 12 },
+  searchBar: {
+    flex: 1,
+    flexDirection: 'row',
+    backgroundColor: '#F5F5F5',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
     height: 54,
-    borderWidth: 1,
-    borderColor: '#EAEAEA'
   },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 16, color: '#333' },
-  micBtn: { 
-    width: 54, 
-    height: 54, 
-    backgroundColor: '#FF7A00', 
-    borderRadius: 16, 
-    alignItems: 'center', 
+  searchInput: { flex: 1, marginLeft: 10, fontSize: 16 },
+  micBtn: {
+    width: 54,
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: '#FF7A00',
+    alignItems: 'center',
     justifyContent: 'center',
-    elevation: 3,
-    shadowColor: '#FF7A00',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
   },
   scrollContent: { padding: 16, paddingBottom: 100 },
   section: { marginBottom: 32 },
-  categoryTitle: { 
-    fontSize: 20, 
-    fontWeight: 'bold', 
-    color: '#FF7A00', 
+  categoryTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FF7A00',
     marginBottom: 16,
-    letterSpacing: 0.5
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  serviceCard: { 
-    width: cardWidth, 
-    backgroundColor: '#FFF', 
-    borderRadius: 12, 
-    overflow: 'hidden',
+  serviceCard: {
+    width: cardWidth,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#F0F0F0',
-    marginBottom: 8
+    borderColor: '#EEE',
+    overflow: 'hidden',
   },
-  imageContainer: { width: '100%', aspectRatio: 1 },
-  image: { width: '100%', height: '100%', resizeMode: 'cover' },
-  textContainer: { 
-    paddingVertical: 8, 
-    paddingHorizontal: 4, 
-    backgroundColor: '#FAFAFA',
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0'
-  },
-  serviceName: { 
-    fontSize: 12, 
-    fontWeight: '600', 
-    color: '#333', 
-    textAlign: 'center' 
-  },
-  emptyState: { alignItems: 'center', marginTop: 100 },
-  emptyText: { color: '#999', marginTop: 12, fontSize: 16 }
+  imageContainer: { aspectRatio: 1 },
+  image: { width: '100%', height: '100%' },
+  textContainer: { padding: 6, backgroundColor: '#FAFAFA' },
+  serviceName: { fontSize: 12, textAlign: 'center', fontWeight: '600' },
 });

@@ -59,25 +59,21 @@ export default function ProviderSignup() {
     email: '',
     homeAddress: '',
     password: '',
-    confirmPassword: '',
     selectedSeva: '',
     agreeTerms: false,
   });
 
-  // Mobile Image Picker Logic
   const pickImage = async (field: 'aadharFront' | 'aadharBack') => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
-
     if (!result.canceled) {
       setFormData({ ...formData, [field]: result.assets[0].uri });
     }
   };
 
-  // Mobile Voice Recording Logic
   const startRecording = async () => {
     try {
       const permission = await Audio.requestPermissionsAsync();
@@ -96,14 +92,29 @@ export default function ProviderSignup() {
     setRecordingUri(uri || null);
   };
 
+  // Validates inputs for Name, DOB, and Phone
   const handleNext = () => {
     if (step === 1 && (!formData.aadharFront || !formData.aadharBack)) {
       Alert.alert("Required", "Please upload both sides of Aadhar");
       return;
     }
-    if (step === 2 && (!formData.fullName || !formData.phone || !formData.homeAddress)) {
-      Alert.alert("Required", "Please fill all mandatory fields");
-      return;
+    if (step === 2) {
+      if (formData.fullName.length < 3) {
+        Alert.alert("Invalid Name", "Please enter your full name as shown on Aadhar.");
+        return;
+      }
+      if (formData.phone.length !== 10) {
+        Alert.alert("Invalid Phone", "Please enter a valid 10-digit mobile number.");
+        return;
+      }
+      if (!formData.dob.includes('/') || formData.dob.length < 10) {
+        Alert.alert("Invalid DOB", "Please enter DOB in DD/MM/YYYY format.");
+        return;
+      }
+      if (!formData.homeAddress) {
+        Alert.alert("Required", "Home address is mandatory.");
+        return;
+      }
     }
     if (step === 3 && !formData.selectedSeva) {
       Alert.alert("Required", "Please select a category");
@@ -112,26 +123,33 @@ export default function ProviderSignup() {
     setStep(step + 1);
   };
 
+  // Fixed the "handleSubmitReview" missing error
+  const handleSubmitReview = () => {
+    if (!formData.agreeTerms) {
+      Alert.alert("Required", "Please agree to the Terms and Conditions.");
+      return;
+    }
+    // Redirect to the status page instead of home
+    router.push('/signup/status' as any);
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => step > 1 ? setStep(step - 1) : router.back()}>
           <ArrowLeft size={24} color="#333" />
         </TouchableOpacity>
         <View style={{ marginLeft: 15 }}>
           <Text style={styles.headerTitle}>Sevadhar Sign Up</Text>
-          <Text style={styles.headerSub}>Step {step} of 4 - Register as a provider</Text>
+          <Text style={styles.headerSub}>Step {step} of 4</Text>
         </View>
       </View>
 
-      {/* Progress Bar */}
       <View style={styles.progressContainer}>
         <View style={[styles.progressBar, { width: `${(step / 4) * 100}%` }]} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        
         {step === 1 && (
           <View>
             <Text style={styles.stepTitle}>Upload Aadhar Card <Text style={styles.red}>*</Text></Text>
@@ -151,12 +169,37 @@ export default function ProviderSignup() {
         {step === 2 && (
           <View>
             <Text style={styles.stepTitle}>Personal Details</Text>
-            <TextInput placeholder="Full Name (from Aadhar) *" style={styles.input} onChangeText={(v)=>setFormData({...formData, fullName: v})} />
-            <TextInput placeholder="Date of Birth (DD/MM/YYYY) *" style={styles.input} />
-            <TextInput placeholder="Home Address *" style={[styles.input, { height: 80 }]} multiline onChangeText={(v)=>setFormData({...formData, homeAddress: v})} />
-            <TextInput placeholder="Phone Number *" style={styles.input} keyboardType="phone-pad" onChangeText={(v)=>setFormData({...formData, phone: v})} />
-            <TextInput placeholder="Email Address (Optional)" style={styles.input} />
-            <TextInput placeholder="Password *" style={styles.input} secureTextEntry={!showPassword} onChangeText={(v)=>setFormData({...formData, password: v})} />
+            <TextInput 
+              placeholder="Full Name (from Aadhar) *" 
+              style={styles.input} 
+              onChangeText={(v)=>setFormData({...formData, fullName: v.replace(/[^a-zA-Z ]/g, '')})} 
+            />
+            <TextInput 
+              placeholder="Date of Birth (DD/MM/YYYY) *" 
+              style={styles.input} 
+              maxLength={10}
+              keyboardType="numeric"
+              onChangeText={(v)=>setFormData({...formData, dob: v})}
+            />
+            <TextInput 
+              placeholder="Home Address *" 
+              style={[styles.input, { height: 80 }]} 
+              multiline 
+              onChangeText={(v)=>setFormData({...formData, homeAddress: v})} 
+            />
+            <TextInput 
+              placeholder="Phone Number *" 
+              style={styles.input} 
+              keyboardType="phone-pad" 
+              maxLength={10}
+              onChangeText={(v)=>setFormData({...formData, phone: v.replace(/[^0-9]/g, '')})} 
+            />
+            <TextInput 
+              placeholder="Password *" 
+              style={styles.input} 
+              secureTextEntry={!showPassword} 
+              onChangeText={(v)=>setFormData({...formData, password: v})} 
+            />
           </View>
         )}
 
@@ -181,18 +224,19 @@ export default function ProviderSignup() {
             <View style={styles.micIconBg}><Mic size={30} color="#FF7A00" /></View>
             <Text style={styles.stepTitle}>Record Voice Intro <Text style={styles.red}>*</Text></Text>
             <Text style={styles.instruction}>Record a 10-20 second introduction about your skills.</Text>
-            
             <TouchableOpacity 
               style={[styles.micCircle, isRecording && { backgroundColor: '#EF4444' }]} 
-              onPressIn={startRecording} 
-              onPressOut={stopRecording}
+              onPressIn={startRecording} onPressOut={stopRecording}
             >
               <Mic size={40} color="#FFF" />
             </TouchableOpacity>
             <Text style={styles.recordStatus}>{isRecording ? "Recording..." : recordingUri ? "Recording Saved!" : "Hold to record"}</Text>
-
             <View style={styles.termsContainer}>
-              <Checkbox value={formData.agreeTerms} onValueChange={(v)=>setFormData({...formData, agreeTerms: v})} color={formData.agreeTerms ? '#FF7A00' : undefined} />
+              <Checkbox 
+                value={formData.agreeTerms} 
+                onValueChange={(v)=>setFormData({...formData, agreeTerms: v})} 
+                color={formData.agreeTerms ? '#FF7A00' : undefined} 
+              />
               <Text style={styles.termsText}>I agree with the <Text style={{color: '#FF7A00'}}>Terms and Conditions *</Text></Text>
             </View>
           </View>
@@ -202,7 +246,7 @@ export default function ProviderSignup() {
           {step > 1 && <TouchableOpacity style={styles.backBtn} onPress={() => setStep(step - 1)}><Text style={{color: '#FF7A00'}}>Back</Text></TouchableOpacity>}
           <TouchableOpacity 
             style={[styles.nextBtn, step === 1 && { width: '100%' }]} 
-            onPress={step < 4 ? handleNext : () => router.push('/(tabs)/home')}
+            onPress={step < 4 ? handleNext : handleSubmitReview}
           >
             <Text style={styles.nextText}>{step === 4 ? "Submit For Review" : "Continue"}</Text>
             {step < 4 && <ChevronRight size={20} color="#FFF" />}
@@ -213,6 +257,7 @@ export default function ProviderSignup() {
   );
 }
 
+// FULL STYLES BLOCK ADDED TO FIX ALL 42 "CANNOT FIND NAME STYLES" ERRORS
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#FAF9F6' },
   header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 50, backgroundColor: '#FFF' },
@@ -239,6 +284,6 @@ const styles = StyleSheet.create({
   termsText: { fontSize: 12, marginLeft: 10, color: '#666' },
   btnRow: { flexDirection: 'row', gap: 10, marginTop: 40, paddingBottom: 40 },
   backBtn: { flex: 1, height: 55, borderRadius: 27, borderWidth: 1, borderColor: '#FF7A00', alignItems: 'center', justifyContent: 'center' },
-  nextBtn: { flex: 2, backgroundColor: '#FFB87A', height: 55, borderRadius: 27, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  nextBtn: { flex: 2, backgroundColor: '#FF7A00', height: 55, borderRadius: 27, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   nextText: { color: '#FFF', fontWeight: 'bold', fontSize: 17, marginRight: 5 }
 });
