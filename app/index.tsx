@@ -63,3 +63,4 @@ const styles = StyleSheet.create({
   adminLink: { marginTop: 40, opacity: 0.4 },
   adminLinkText: { fontSize: 11, color: '#666', textDecorationLine: 'underline' }
 });
+

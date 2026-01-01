@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView,
-  Image 
-} from 'react-native';
 import { useRouter } from 'expo-router';
-import Svg, { Path, Circle } from 'react-native-svg';
+import { useState } from 'react';
+import {
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from 'react-native';
+import Svg, { Circle, Path } from 'react-native-svg';
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -71,7 +70,7 @@ export default function LandingScreen() {
             </Svg>
           </View>
           <Text style={styles.brandTitle}>
-            sev<Text style={{ color: '#FF7A00' }}>@</Text>dhar
+            Sev<Text style={{ color: '#FF7A00' }}>@</Text>dhar
           </Text>
           <Text style={styles.brandTagline}>{t('tagline')}</Text>
         </View>
