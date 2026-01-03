@@ -13,7 +13,7 @@ import {
   Dog,
   Globe,
   Hammer,
-  Heart, // Fixed: use Hammer instead of Tool to avoid export error
+  Heart,
   Home,
   Layers,
   Leaf,
@@ -62,8 +62,8 @@ const HomePage = () => {
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('EN');
 
-  // categoriesList used in Search Modal
-  const categoriesList = [
+  // UPDATED: Categories used specifically when user clicks on Search Bar
+  const sevadharCategories = [
     { id: '1', name: 'Home Help', icon: Home, color: '#FF7A00' },
     { id: '2', name: 'Repairs', icon: Wrench, color: '#3B82F6' },
     { id: '3', name: 'Construction', icon: Construction, color: '#F59E0B' },
@@ -89,9 +89,7 @@ const HomePage = () => {
   const handleVoiceTrigger = () => {
     setVoiceStep('listening');
     setVoiceModalVisible(true);
-    setTimeout(() => {
-      setVoiceStep('result');
-    }, 2000);
+    setTimeout(() => { setVoiceStep('result'); }, 2000);
   };
 
   return (
@@ -102,22 +100,18 @@ const HomePage = () => {
           <View style={styles.locIconBg}><MapPin size={18} color="#FF7A00" /></View>
           <View>
             <Text style={styles.locLabel}>Current Location</Text>
-            <View style={styles.locNameRow}>
-              <Text style={styles.locName}>{selectedLocation}</Text>
-              <ChevronDown size={14} color="#FF7A00" />
-            </View>
+            <View style={styles.locNameRow}><Text style={styles.locName}>{selectedLocation}</Text><ChevronDown size={14} color="#FF7A00" /></View>
           </View>
         </TouchableOpacity>
         <Text style={styles.brandTitle}>Sevadhar</Text>
         <TouchableOpacity style={styles.langBtn} onPress={() => setLanguageModalVisible(true)}>
-          <Globe size={14} color="#333" />
-          <Text style={styles.langText}>{selectedLanguage}</Text>
+          <Globe size={14} color="#333" /><Text style={styles.langText}>{selectedLanguage}</Text>
         </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollPadding}>
         
-        {/* 2. SEARCH BAR */}
+        {/* 2. SEARCH BAR TRIGGERS OVERLAY */}
         <View style={styles.searchSection}>
           <TouchableOpacity activeOpacity={1} style={styles.searchBar} onPress={() => setSearchVisible(true)}>
             <Search size={20} color="#999" />
@@ -128,7 +122,7 @@ const HomePage = () => {
 
         {/* 3. PROMO BANNER CAROUSEL */}
         <View style={styles.bannerContainer}>
-          <LinearGradient colors={['#FFB87A', '#FF9F43']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
+          <LinearGradient colors={['#FFB87A', '#FF9F43']} style={styles.banner}>
             <View style={styles.bannerTextContent}>
               <Text style={styles.bannerDiscount}>20% OFF</Text>
               <Text style={styles.bannerSub}>on your first booking</Text>
@@ -156,35 +150,25 @@ const HomePage = () => {
           </ScrollView>
         </View>
 
-        {/* 5. MOST USED BY YOU (Matches image_b1a943.png circular icons) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Most Used by You</Text>
-          <Text style={styles.sectionLabel}>Based on your booking history</Text>
-        </View>
+        {/* 5. MOST USED BY YOU */}
+        <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Most Used by You</Text></View>
         <View style={styles.mostUsedRow}>
-          {[
-            { name: 'Plumber', img: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=200', count: '5x booked' },
+          {[{ name: 'Plumber', img: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=200', count: '5x booked' },
             { name: 'Electrician', img: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200', count: '3x booked' },
             { name: 'Home Clean', img: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=200', count: '2x booked' }
           ].map((item, index) => (
             <View key={index} style={styles.circularItem}>
-              <View style={styles.circleBorder}>
-                <Image source={{ uri: item.img }} style={styles.circleImg} />
-              </View>
+              <View style={styles.circleBorder}><Image source={{ uri: item.img }} style={styles.circleImg} /></View>
               <Text style={styles.circleName} numberOfLines={1}>{item.name}</Text>
               <Text style={styles.circleSub}>{item.count}</Text>
             </View>
           ))}
         </View>
 
-        {/* 6. ALL SERVICES GRID (Matches image_b1ac24.png) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>All Services</Text>
-          <Text style={styles.sectionLabel}>Browse all available services</Text>
-        </View>
+        {/* 6. ALL SERVICES GRID */}
+        <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>All Services</Text></View>
         <View style={styles.grid}>
-          {[
-            { name: 'Home Cleaning', tag: 'Try & Hire', color: '#FF7A00', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200' },
+          {[{ name: 'Home Cleaning', tag: 'Try & Hire', color: '#FF7A00', img: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200' },
             { name: 'AC Repair', tag: 'Warranty', color: '#10B981', img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200' },
             { name: 'Geyser Repair', tag: null, color: null, img: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200' },
             { name: 'Painter (POP)', tag: 'Try & Hire', color: '#FF7A00', img: 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=200' },
@@ -199,60 +183,34 @@ const HomePage = () => {
           ))}
         </View>
 
-        {/* 7. MOST CALLED THIS WEEK (Matches image_de7e0e.png) */}
+        {/* 7. MOST CALLED THIS WEEK */}
         <View style={styles.sectionHeader}>
-          <View style={styles.row}>
-            <Phone size={18} color="#FF7A00" style={{ marginRight: 6 }} />
-            <Text style={styles.sectionTitle}>Most Called This Week</Text>
-          </View>
-          <Text style={styles.sectionLabel}>Top rated & most responsive workers</Text>
+          <View style={styles.row}><Phone size={18} color="#FF7A00" style={{ marginRight: 6 }} /><Text style={styles.sectionTitle}>Most Called This Week</Text></View>
         </View>
         <View style={styles.workerList}>
-          {[
-            { name: 'Raju Plumber', service: 'Plumber', rating: '4.9', calls: '234', img: 'https://randomuser.me/api/portraits/men/32.jpg' },
+          {[{ name: 'Raju Plumber', service: 'Plumber', rating: '4.9', calls: '234', img: 'https://randomuser.me/api/portraits/men/32.jpg' },
             { name: 'Suresh Electric', service: 'Electrician', rating: '4.8', calls: '198', img: 'https://randomuser.me/api/portraits/men/45.jpg' },
             { name: 'Priya Cleaning', service: 'Home Cleaning', rating: '4.7', calls: '176', img: 'https://randomuser.me/api/portraits/women/44.jpg' },
           ].map((worker, index) => (
             <TouchableOpacity key={index} style={styles.workerCard}>
-              <View style={styles.workerAvatarContainer}>
-                <Image source={{ uri: worker.img }} style={styles.workerAvatar} />
-                <View style={styles.onlineDot} />
-              </View>
-              <View style={styles.workerInfo}>
-                <Text style={styles.workerName}>{worker.name}</Text>
-                <Text style={styles.workerService}>{worker.service}</Text>
-              </View>
-              <View style={styles.workerStats}>
-                <View style={styles.row}>
-                  <Star size={14} color="#FF7A00" fill="#FF7A00" />
-                  <Text style={styles.ratingText}>{worker.rating}</Text>
-                </View>
-                <Text style={styles.callsText}>{worker.calls} calls</Text>
-              </View>
+              <View style={styles.workerAvatarContainer}><Image source={{ uri: worker.img }} style={styles.workerAvatar} /><View style={styles.onlineDot} /></View>
+              <View style={styles.workerInfo}><Text style={styles.workerName}>{worker.name}</Text><Text style={styles.workerService}>{worker.service}</Text></View>
+              <View style={styles.workerStats}><View style={styles.row}><Star size={14} color="#FF7A00" fill="#FF7A00" /><Text style={styles.ratingText}>{worker.rating}</Text></View><Text style={styles.callsText}>{worker.calls} calls</Text></View>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* 8. MOST POPULAR SECTION (Matches image_de7e0e.png perfectly) */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Most Popular</Text>
-        </View>
+        {/* 8. MOST POPULAR (Matches image_de7e0e.png) */}
+        <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>Most Popular</Text></View>
         <View style={styles.horizontalWrapper}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.hScroll}>
-            {[
-              { name: 'Home Cleaning', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400', rating: '4.8', count: '3.8M' },
+            {[{ name: 'Home Cleaning', img: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400', rating: '4.8', count: '3.8M' },
               { name: 'Plumber', img: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=400', rating: '4.7', count: '2.8M' },
             ].map((item, index) => (
               <View key={index} style={styles.popCardContainer}>
-                <TouchableOpacity style={styles.popCard}>
-                  <Image source={{ uri: item.img }} style={styles.popImage} />
-                </TouchableOpacity>
-                <View style={styles.popInfo}>
-                  <Text style={styles.popTitle}>{item.name}</Text>
-                  <View style={styles.row}>
-                    <Star size={12} color="#FF7A00" fill="#FF7A00" />
-                    <Text style={styles.popRating}>{item.rating} <Text style={styles.popCount}>({item.count})</Text></Text>
-                  </View>
+                <TouchableOpacity style={styles.popCard}><Image source={{ uri: item.img }} style={styles.popImage} /></TouchableOpacity>
+                <View style={styles.popInfo}><Text style={styles.popTitle}>{item.name}</Text>
+                  <View style={styles.row}><Star size={12} color="#FF7A00" fill="#FF7A00" /><Text style={styles.popRating}>{item.rating} <Text style={styles.popCount}>({item.count})</Text></Text></View>
                 </View>
               </View>
             ))}
@@ -261,12 +219,12 @@ const HomePage = () => {
           <TouchableOpacity style={[styles.popArrow, { right: 5 }]}><ChevronRight size={20} color="#333" /></TouchableOpacity>
           <View style={styles.popIndicatorTrack}><View style={styles.popIndicatorThumb} /></View>
         </View>
-
       </ScrollView>
 
+      {/* SOS BUTTON */}
       <TouchableOpacity style={styles.sosButton}><Phone size={28} color="#FFF" fill="#FFF" /></TouchableOpacity>
 
-      {/* DROPWDOWN MODALS (Location & Language) */}
+      {/* NEW MODAL: LOCATION SELECTION */}
       <Modal visible={locationModalVisible} transparent animationType="fade">
         <View style={styles.dropdownOverlay}>
           <View style={styles.dropdownCard}>
@@ -281,6 +239,7 @@ const HomePage = () => {
         </View>
       </Modal>
 
+      {/* NEW MODAL: LANGUAGE SELECTION */}
       <Modal visible={languageModalVisible} transparent animationType="fade">
         <View style={styles.dropdownOverlay}>
           <View style={styles.dropdownCard}>
@@ -295,19 +254,29 @@ const HomePage = () => {
         </View>
       </Modal>
 
-      {/* SEARCH MODAL */}
+      {/* MODAL 1: SEARCH OVERLAY (UPDATED WITH SEVADHAR CATEGORIES) */}
       <Modal visible={isSearchVisible} animationType="slide" onRequestClose={() => setSearchVisible(false)}>
         <SafeAreaView style={styles.searchOverlay}>
           <View style={styles.searchHeader}><TouchableOpacity onPress={() => setSearchVisible(false)}><ArrowLeft size={24} color="#333" /></TouchableOpacity><Text style={styles.searchTitle}>Search</Text></View>
-          <View style={styles.searchInputContainer}><Search size={22} color="#666" style={{ marginRight: 10 }} /><TextInput placeholder="Find services, food, or places" style={styles.fullSearchInput} autoFocus={true} value={searchQuery} onChangeText={setSearchQuery} /></View>
+          <View style={styles.searchInputContainer}><Search size={22} color="#666" style={{ marginRight: 10 }} /><TextInput placeholder="Find Electrician, Maid, or Pandit..." style={styles.fullSearchInput} autoFocus={true} value={searchQuery} onChangeText={setSearchQuery} /></View>
           <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
+            <Text style={styles.searchSectionTitle}>Your history</Text>
+            <View style={styles.pillsRow}>{['Maid', 'Cook', 'Plumber', 'Electrician'].map((text, i) => (<View key={i} style={styles.pill}><Text style={styles.pillText}>{text}</Text></View>))}</View>
             <Text style={styles.searchSectionTitle}>Search by category</Text>
-            <View style={styles.searchGrid}>{categoriesList.map((item) => (<TouchableOpacity key={item.id} style={styles.searchGridItem} onPress={() => { setSearchQuery(item.name); setSearchVisible(false); }}><item.icon size={24} color={item.color} style={{ marginRight: 12 }} /><Text style={styles.searchGridText}>{item.name}</Text></TouchableOpacity>))}</View>
+            <View style={styles.searchGrid}>
+              {sevadharCategories.map((item) => (
+                <TouchableOpacity key={item.id} style={styles.searchGridItem} onPress={() => { setSearchQuery(item.name); setSearchVisible(false); }}>
+                  <item.icon size={22} color={item.color} style={{ marginRight: 12 }} /><Text style={styles.searchGridText}>{item.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <Text style={styles.searchSectionTitle}>Trending searches</Text>
+            <View style={styles.pillsRow}>{['AC Repair', 'Deep Clean', 'Mali', 'Doctor', 'Tailor', 'Pandit'].map((text, i) => (<View key={i} style={styles.pill}><Text style={styles.pillText}>{text}</Text></View>))}</View>
           </ScrollView>
         </SafeAreaView>
       </Modal>
 
-      {/* VOICE MODAL */}
+      {/* MODAL 2: VOICE SEARCH MODAL */}
       <Modal visible={voiceModalVisible} transparent={true} animationType="fade">
         <View style={styles.voiceOverlayBg}>
           <View style={styles.voiceContainer}>
@@ -360,7 +329,7 @@ const styles = StyleSheet.create({
   sectionHeader: { paddingHorizontal: 16, marginTop: 24, marginBottom: 12 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', color: '#111' },
   sectionLabel: { fontSize: 12, color: '#666', marginTop: 2 },
-  horizontalWrapper: { position: 'relative' }, // Added to fix error image_dd8933.png
+  horizontalWrapper: { position: 'relative' }, 
   hScroll: { paddingLeft: 16 },
   recCard: { width: width * 0.44, backgroundColor: '#FFF', borderRadius: 20, marginRight: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#EEE' },
   recImage: { width: '100%', height: 110 },
@@ -382,17 +351,15 @@ const styles = StyleSheet.create({
   gridText: { color: '#FFF', fontSize: 10, fontWeight: 'bold', textAlign: 'center' },
   workerList: { paddingHorizontal: 16 },
   workerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', padding: 12, borderRadius: 20, marginBottom: 12, borderWidth: 1, borderColor: '#F3F4F6', elevation: 1 },
-  workerAvatarContainer: { position: 'relative' }, // Added to fix error image_dd8933.png
+  workerAvatarContainer: { position: 'relative' },
   workerAvatar: { width: 50, height: 50, borderRadius: 25 },
   onlineDot: { position: 'absolute', bottom: 0, right: 0, width: 14, height: 14, borderRadius: 7, backgroundColor: '#10B981', borderWidth: 2, borderColor: '#FFF' },
   workerInfo: { flex: 1, marginLeft: 12 },
   workerName: { fontSize: 15, fontWeight: 'bold', color: '#333' },
   workerService: { fontSize: 12, color: '#666' },
-  workerStats: { alignItems: 'flex-end' }, // Added to fix error image_dd8933.png
+  workerStats: { alignItems: 'flex-end' },
   ratingText: { fontSize: 14, fontWeight: 'bold', marginLeft: 4 },
   callsText: { fontSize: 11, color: '#999', marginTop: 2 },
-
-  // Most Popular Card styles (image_de7e0e.png)
   popCardContainer: { width: width * 0.45, marginRight: 15 },
   popCard: { borderRadius: 15, overflow: 'hidden', height: 120 },
   popImage: { width: '100%', height: '100%' },
@@ -403,7 +370,6 @@ const styles = StyleSheet.create({
   popArrow: { position: 'absolute', top: '30%', backgroundColor: '#FFF', width: 34, height: 34, borderRadius: 17, justifyContent: 'center', alignItems: 'center', elevation: 4 },
   popIndicatorTrack: { height: 4, backgroundColor: '#EEE', width: 100, alignSelf: 'center', marginTop: 20, borderRadius: 2 },
   popIndicatorThumb: { height: 4, backgroundColor: '#FF7A00', width: 35, borderRadius: 2 },
-
   sosButton: { position: 'absolute', bottom: 20, right: 20, backgroundColor: '#EF4444', width: 64, height: 64, borderRadius: 32, justifyContent: 'center', alignItems: 'center', elevation: 6 },
   dropdownOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   dropdownCard: { width: width * 0.8, backgroundColor: '#FFF', borderRadius: 20, padding: 20, elevation: 5 },
@@ -417,9 +383,12 @@ const styles = StyleSheet.create({
   searchInputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', marginHorizontal: 16, borderRadius: 30, paddingHorizontal: 16, height: 50, marginBottom: 20, borderWidth: 1, borderColor: '#EEE' },
   fullSearchInput: { flex: 1, fontSize: 16 },
   searchSectionTitle: { fontSize: 18, fontWeight: 'bold', marginVertical: 15 },
+  pillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  pill: { backgroundColor: '#F3F4F6', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB' },
+  pillText: { fontSize: 14, color: '#444' },
   searchGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   searchGridItem: { width: '48%', flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', padding: 15, borderRadius: 15, borderWidth: 1, borderColor: '#EEE', marginBottom: 12 },
-  searchGridText: { fontSize: 16, fontWeight: '600' },
+  searchGridText: { fontSize: 13, fontWeight: '600', color: '#333' },
   voiceOverlayBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
   voiceContainer: { width: width * 0.85, backgroundColor: '#FFF', borderRadius: 25, padding: 24, alignItems: 'center' },
   closeVoice: { alignSelf: 'flex-end' },

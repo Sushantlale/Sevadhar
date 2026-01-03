@@ -64,13 +64,13 @@ export default function LandingScreen() {
           <Image
             source={require('../assets/images/logo.png')}
             style={styles.logo}
-            resizeMode="contain"
+            resizeMode="cover"
           />
         </View>
 
         {/* Brand */}
         <Text style={styles.brandTitle}>
-          sev<Text style={styles.atSymbol}>@</Text>dhar
+          <Text style={{ color: '#FF7A00' }}>Sevadhar</Text>
         </Text>
         <Text style={styles.brandTagline}>{t('tagline')}</Text>
 
