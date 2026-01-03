@@ -3,29 +3,29 @@ import Checkbox from 'expo-checkbox';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import {
-    ArrowLeft,
-    Calendar,
-    Camera,
-    Check,
-    ChevronRight,
-    Lock,
-    MapPin,
-    Mic,
-    Phone,
-    User
+  ArrowLeft,
+  Calendar,
+  Camera,
+  Check,
+  ChevronRight,
+  Lock,
+  MapPin,
+  Mic,
+  Phone,
+  User
 } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
-    Alert,
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
