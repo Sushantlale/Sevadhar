@@ -1,27 +1,27 @@
 import { useRouter } from 'expo-router';
 import {
-    Bell,
-    Camera,
-    ChevronRight,
-    Clock,
-    Edit2,
-    Mail,
-    MapPin, Phone,
-    Plus,
-    User,
-    Wallet
+  Bell,
+  Camera,
+  ChevronRight,
+  Clock,
+  Edit2,
+  Mail,
+  MapPin, Phone,
+  Plus,
+  User,
+  Wallet
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    Image,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Text,
-    TouchableOpacity,
-    View
+  Dimensions,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -163,7 +163,7 @@ export default function ProfilePage() {
                 <View style={styles.walletHeader}>
                   <View style={styles.row}>
                     <Wallet size={20} color="#FF7A00" />
-                    <Text style={styles.walletTitle}>My Wallet</Text>
+                    <Text style={styles.walletTitle}>SevaCoins</Text>
                   </View>
                   <TouchableOpacity onPress={() => router.push('/history')}>
                     <Clock size={20} color="#9CA3AF" />
@@ -175,10 +175,10 @@ export default function ProfilePage() {
                   <Text style={styles.balanceValue}>₹{userData.walletBalance}</Text>
                 </View>
 
-                <TouchableOpacity style={styles.addMoneyBtn}>
+                {/* <TouchableOpacity style={styles.addMoneyBtn}>
                   <Text style={styles.addMoneyText}>Add Money</Text>
                 </TouchableOpacity>
-                <Text style={styles.walletNote}>💰 Deduction applied per connected call</Text>
+                <Text style={styles.walletNote}>💰 Deduction applied per connected call</Text> */}
               </View>
 
               {/* Work Gallery */}
