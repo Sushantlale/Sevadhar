@@ -1,88 +1,194 @@
-import { ChevronRight, Heart, Star } from 'lucide-react-native';
-import React from 'react';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Dimensions,
+  FlatList,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-// Assuming your Contexts have been moved to a 'context' folder
-// For now, these use mock hooks if the files aren't ready yet
-const useLanguage = () => ({ t: (s: string) => s === 'favorites' ? 'Favorites' : s });
-const useFavorites = () => ({ 
-  favorites: [
-    { id: '1', name: 'Ramesh Electrician', service: 'Electrician', rating: 4.8 },
-    { id: '2', name: 'Suresh Plumber', service: 'Plumber', rating: 4.5 }
-  ], 
-  removeFavorite: (id: string) => console.log('Remove', id) 
-});
 
-export default function FavoritesPage() {
-  const { t } = useLanguage();
-  const { favorites, removeFavorite } = useFavorites();
+const { width, height } = Dimensions.get('window');
+
+// --- Mock Data ---
+const CATEGORIES = ['All', 'Plumbers', 'Electricians', 'Cleaning', 'HVAC'];
+
+const FAVORITES_DATA = [
+  {
+    id: '1',
+    name: 'Ramesh Electrici...',
+    role: 'Senior Technician',
+    rating: '4.8',
+    jobs: '124 Jobs',
+    initial: 'R',
+    color: '#FFEDD5',
+    textColor: '#EA580C',
+    online: true,
+    category: 'Electricians'
+  },
+  {
+    id: '2',
+    name: 'Suresh Plumber',
+    role: 'Pipe & Leak Expert',
+    rating: '4.5',
+    jobs: '89 Jobs',
+    initial: 'S',
+    color: '#DBEAFE',
+    textColor: '#2563EB',
+    online: false,
+    category: 'Plumbers'
+  },
+  {
+    id: '3',
+    name: 'Priya Cleaning',
+    role: 'Deep Clean Specialist',
+    rating: '4.9',
+    jobs: '205 Jobs',
+    initial: 'P',
+    color: '#F3E8FF',
+    textColor: '#9333EA',
+    online: true,
+    category: 'Cleaning'
+  },
+  {
+    id: '4',
+    name: 'Amit AC Repair',
+    role: 'HVAC Technician',
+    rating: '4.7',
+    jobs: '56 Jobs',
+    initial: 'A',
+    color: '#CCFBF1',
+    textColor: '#0D9488',
+    online: false,
+    category: 'HVAC'
+  },
+];
+
+export default function FavoritesScreen() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState('All');
+  const [search, setSearch] = useState('');
+
+  const filteredData = FAVORITES_DATA.filter(item => {
+    const matchesTab = activeTab === 'All' || item.category === activeTab;
+    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
+    return matchesTab && matchesSearch;
+  });
+
+  const renderWorkerCard = ({ item }: { item: typeof FAVORITES_DATA[0] }) => (
+    <TouchableOpacity 
+      activeOpacity={0.9}
+      style={styles.card}
+      onPress={() => router.push(`/service/serviceprofile`)}
+    >
+      <View style={styles.cardContent}>
+        {/* Avatar Section */}
+        <View style={[styles.avatarContainer, { backgroundColor: item.color }]}>
+          <Text style={[styles.avatarText, { color: item.textColor }]}>{item.initial}</Text>
+          {item.online && <View style={styles.onlineDot} />}
+        </View>
+
+        {/* Info Section */}
+        <View style={styles.infoContainer}>
+          <View style={styles.nameHeader}>
+            <Text style={styles.workerName} numberOfLines={1}>{item.name}</Text>
+            <TouchableOpacity hitSlop={10}>
+              <Ionicons name="heart" size={22} color="#EF4444" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={styles.roleText}>{item.role}</Text>
+          
+          <View style={styles.statsRow}>
+            <View style={styles.ratingBadge}>
+              <MaterialIcons name="star" size={14} color="#FBBF24" />
+              <Text style={styles.ratingText}>{item.rating}</Text>
+            </View>
+            <Text style={styles.dot}>•</Text>
+            <Text style={styles.jobsText}>{item.jobs}</Text>
+          </View>
+        </View>
+
+        {/* Arrow Action */}
+        <View style={styles.arrowContainer}>
+           <MaterialIcons name="chevron-right" size={24} color="#D1D5DB" />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Placeholder - You can import your mobile Header component here */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('favorites')}</Text>
-        <Text style={styles.headerSub}>Your saved services and providers</Text>
+      {/* Dynamic Background Gradients */}
+      <View style={styles.bgCircle1} />
+      <View style={styles.bgCircle2} />
+
+      <View style={styles.headerContainer}>
+        <View style={styles.titleRow}>
+          <View>
+            <Text style={styles.mainTitle}>Favorites</Text>
+            <Text style={styles.subTitle}>Your trusted professionals</Text>
+          </View>
+          <TouchableOpacity style={styles.iconBtn}>
+            <Ionicons name="options-outline" size={22} color="#374151" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search-outline" size={20} color="#9CA3AF" style={{ marginRight: 8 }} />
+            <TextInput
+              placeholder="Search saved..."
+              style={styles.input}
+              value={search}
+              onChangeText={setSearch}
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+          <TouchableOpacity style={styles.sortBtn}>
+            <MaterialIcons name="sort" size={24} color="#4B5563" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Categories */}
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.categoryScroll}
+        >
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              onPress={() => setActiveTab(cat)}
+              style={[
+                styles.categoryChip,
+                activeTab === cat && styles.activeChip
+              ]}
+            >
+              <Text style={[
+                styles.categoryText,
+                activeTab === cat && styles.activeCategoryText
+              ]}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {favorites.length > 0 ? (
-          <View style={styles.list}>
-            {favorites.map((item) => (
-              <View key={item.id} style={styles.card}>
-                {/* Avatar */}
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-                </View>
-
-                {/* Details */}
-                <View style={styles.details}>
-                  <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.service}>{item.service}</Text>
-                </View>
-
-                {/* Actions */}
-                <View style={styles.actions}>
-                  {item.rating && (
-                    <View style={styles.ratingBadge}>
-                      <Star size={12} color="#FF7A00" fill="#FF7A00" />
-                      <Text style={styles.ratingText}>{item.rating}</Text>
-                    </View>
-                  )}
-                  
-                  <TouchableOpacity 
-                    style={styles.removeBtn} 
-                    onPress={() => removeFavorite(item.id)}
-                  >
-                    <Heart size={20} color="#EF4444" fill="#EF4444" />
-                  </TouchableOpacity>
-                  
-                  <ChevronRight size={20} color="#9CA3AF" />
-                </View>
-              </View>
-            ))}
-          </View>
-        ) : (
-          /* Empty State */
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Heart size={40} color="#FF7A00" />
-            </View>
-            <Text style={styles.emptyTitle}>No favorites yet</Text>
-            <Text style={styles.emptySub}>
-              Save your favorite services and providers here for quick access
-            </Text>
-          </View>
-        )}
-      </ScrollView>
-
-      {/* BottomNav is handled automatically by the (tabs) folder structure in Expo Router */}
+      <FlatList
+        data={filteredData}
+        renderItem={renderWorkerCard}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listPadding}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 }
@@ -90,125 +196,209 @@ export default function FavoritesPage() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    backgroundColor: '#FFFBF7',
   },
-  header: {
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
+  // Background decorative elements
+  bgCircle1: {
+    position: 'absolute',
+    top: -50,
+    left: -50,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(255, 126, 54, 0.08)',
+    zIndex: -1,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  bgCircle2: {
+    position: 'absolute',
+    top: 100,
+    right: -50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(255, 126, 54, 0.05)',
+    zIndex: -1,
+  },
+  headerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  mainTitle: {
+    fontSize: 32,
+    fontWeight: '800',
     color: '#111827',
+    fontFamily: 'Poppins-Bold',
   },
-  headerSub: {
+  subTitle: {
     fontSize: 14,
     color: '#6B7280',
-    marginTop: 4,
+    fontWeight: '500',
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100, // Space for the bottom tabs
-  },
-  list: {
-    gap: 12,
-  },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFF',
-    padding: 16,
-    borderRadius: 16,
+  iconBtn: {
+    padding: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: '#F3F4F6',
-    elevation: 2, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFEBDC',
-    alignItems: 'center',
-    justifyContent: 'center',
+  searchRow: {
+    flexDirection: 'row',
+    marginTop: 25,
+    gap: 12,
   },
-  avatarText: {
-    color: '#FF7A00',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  details: {
+  searchBar: {
     flex: 1,
-    marginLeft: 12,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  service: {
-    fontSize: 14,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    paddingHorizontal: 15,
+    height: 52,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1F2937',
+  },
+  sortBtn: {
+    width: 52,
+    height: 52,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+  },
+  categoryScroll: {
+    marginTop: 20,
+    paddingBottom: 10,
+    gap: 10,
+  },
+  categoryChip: {
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+    borderRadius: 25,
+    backgroundColor: '#FFFFFF',
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: '#F3F4F6',
+  },
+  activeChip: {
+    backgroundColor: '#FF7E36',
+    borderColor: '#FF7E36',
+  },
+  categoryText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4B5563',
+  },
+  activeCategoryText: {
+    color: '#FFFFFF',
+  },
+  listPadding: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 100,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.5)',
+    shadowColor: '#FF7E36',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.05,
+    shadowRadius: 15,
+    elevation: 3,
+  },
+  cardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  onlineDot: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: '#22C55E',
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+  },
+  infoContainer: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  nameHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  workerName: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
+    maxWidth: '85%',
+  },
+  roleText: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+    fontWeight: '500',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 6,
   },
   ratingBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
-    gap: 4,
+    backgroundColor: '#FFFBEB',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   ratingText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '800',
+    color: '#92400E',
+    marginLeft: 3,
   },
-  removeBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
+  dot: {
+    marginHorizontal: 8,
+    color: '#D1D5DB',
   },
-  emptyContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 80,
-    paddingHorizontal: 40,
+  jobsText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
   },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  emptySub: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
-  },
+  arrowContainer: {
+    marginLeft: 5,
+  }
 });
