@@ -1,25 +1,25 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    ArrowLeft,
-    CheckCircle,
-    ChevronDown,
-    Filter,
-    MapPin,
-    Mic,
-    Phone,
-    Search,
-    Star
+  ArrowLeft,
+  CheckCircle,
+  ChevronDown,
+  Filter,
+  MapPin,
+  Mic,
+  Phone,
+  Search,
+  Star
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Dimensions,
-    FlatList,
-    SafeAreaView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -74,7 +74,19 @@ export default function ServiceListingPage() {
   });
 
   const renderWorker = ({ item }: { item: typeof mockWorkers[0] }) => (
-    <View style={styles.workerCard}>
+    <TouchableOpacity 
+      style={styles.workerCard} 
+      onPress={() => router.push({
+        // REMOVED .tsx and added the correct folder path
+        pathname: "/service/serviceprofile", 
+        params: { 
+          name: item.name,
+          location: `${item.location}, ${item.city}`,
+          rating: item.rating,
+          jobs: item.jobsCompleted,
+        }
+      })}
+    >
       <View style={styles.cardHeader}>
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
@@ -97,16 +109,18 @@ export default function ServiceListingPage() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.callBtn} onPress={() => console.log('Calling:', item.id)}>
+        <TouchableOpacity style={styles.callBtn} onPress={(e) => {
+          e.stopPropagation(); 
+          console.log('Calling:', item.id);
+        }}>
           <Phone size={20} color="#FFF" />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Sticky Header */}
       <View style={styles.header}>
         <View style={styles.topRow}>
           <View style={styles.topLeft}>
@@ -128,7 +142,6 @@ export default function ServiceListingPage() {
           </View>
         </View>
 
-        {/* Search & Filter Bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
             <Search size={18} color="#999" />
@@ -152,7 +165,6 @@ export default function ServiceListingPage() {
         </View>
       </View>
 
-      {/* Workers List */}
       <FlatList
         data={filteredWorkers}
         keyExtractor={(item) => item.id.toString()}
