@@ -19,38 +19,43 @@ export default function LoginScreen() {
     const router = useRouter();
     const [showPassword, setShowPassword] = useState(false);
     const [agreeTerms, setAgreeTerms] = useState(false);
-    const [toast, setToast] = useState<{ title: string, msg: string } | null>(null); // NEW: Toast state
+    const [toast, setToast] = useState<{ title: string, msg: string } | null>(null);
     const [formData, setFormData] = useState({
         phone: '',
         password: '',
     });
 
-    // NEW: Function matching your signup page pop-up logic
     const showErrorMessage = (title: string, msg: string) => {
         setToast({ title, msg });
         setTimeout(() => setToast(null), 4000);
     };
 
     const handleLogin = () => {
-        // 1. Mandatory Field Validation matching your logic
+        // 1. Mandatory Field Validation
         if (!formData.phone || !formData.password) {
             showErrorMessage("Field Required", "Please fill all mandatory fields marked with *");
             return;
         }
 
-        // 2. Phone Number Length Validation
+        // 2. Password length validation (minimum 8 characters)
+        if (formData.password.length < 8) {
+            showErrorMessage("Invalid Password", "Password must be at least 8 characters long");
+            return;
+        }
+
+        // 3. Phone Number Length Validation
         if (formData.phone.length !== 10) {
             showErrorMessage("Invalid Phone Number", "Please enter a valid 10-digit phone number");
             return;
         }
 
-        // 3. Terms and Conditions Validation
+        // 4. Terms and Conditions Validation
         if (!agreeTerms) {
             showErrorMessage("Terms Required", "Please agree to the Terms and Conditions");
             return;
         }
 
-        // 4. Successful Login Redirection
+        // 5. Successful Login Redirection
         Alert.alert("Success", "Logged in successfully!");
         router.push('/(tabs)/home' as any);
     };
@@ -61,7 +66,6 @@ export default function LoginScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={{ flex: 1 }}
             >
-                {/* NEW: Error Pop-up (Toast) UI matching your images */}
                 {toast && (
                     <View style={styles.errorToast}>
                         <Text style={styles.errorToastTitle}>{toast.title}</Text>
@@ -69,7 +73,6 @@ export default function LoginScreen() {
                     </View>
                 )}
 
-                {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()}>
                         <ArrowLeft size={24} color="#333" />
@@ -82,7 +85,6 @@ export default function LoginScreen() {
                         <Text style={{ color: '#FF7A00' }}>Sevadhar</Text>
                     </Text>
 
-                    {/* Phone Number Input Section */}
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Phone Number <Text style={styles.red}>*</Text></Text>
                         <View style={styles.inputWrapper}>
@@ -98,7 +100,6 @@ export default function LoginScreen() {
                         </View>
                     </View>
 
-                    {/* Password Input Section */}
                     <View style={styles.inputGroup}>
                         <Text style={styles.label}>Password <Text style={styles.red}>*</Text></Text>
                         <View style={styles.inputWrapper}>
@@ -116,7 +117,6 @@ export default function LoginScreen() {
                         </View>
                     </View>
 
-                    {/* Terms and Conditions Section */}
                     <View style={styles.termsRow}>
                         <Checkbox
                             value={agreeTerms}
@@ -129,19 +129,16 @@ export default function LoginScreen() {
                         </Text>
                     </View>
 
-                    {/* Sign In Button */}
                     <TouchableOpacity style={styles.submitBtn} onPress={handleLogin}>
                         <Text style={styles.submitBtnText}>Sign In</Text>
                     </TouchableOpacity>
 
-                    {/* Forgot Password Section */}
                     <TouchableOpacity 
                         style={styles.forgotBtn} 
                         onPress={() => router.push('/signup/forgot-password' as any)}
                     >
                         <Text style={styles.forgotText}>Forgot Password ?</Text>
                     </TouchableOpacity>
-
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -150,7 +147,6 @@ export default function LoginScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#FAF9F6' },
-    // NEW: Error Toast Styles
     errorToast: {
         position: 'absolute',
         top: 60,
@@ -164,7 +160,6 @@ const styles = StyleSheet.create({
     },
     errorToastTitle: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
     errorToastMsg: { color: '#FFF', fontSize: 14, marginTop: 2 },
-    
     header: { 
         flexDirection: 'row', 
         alignItems: 'center', 

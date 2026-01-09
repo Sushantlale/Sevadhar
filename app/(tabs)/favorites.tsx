@@ -1,214 +1,278 @@
-import { ChevronRight, Heart, Star } from 'lucide-react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  TextInput,
+  StatusBar,
 } from 'react-native';
-// Assuming your Contexts have been moved to a 'context' folder
-// For now, these use mock hooks if the files aren't ready yet
-const useLanguage = () => ({ t: (s: string) => s === 'favorites' ? 'Favorites' : s });
-const useFavorites = () => ({ 
-  favorites: [
-    { id: '1', name: 'Ramesh Electrician', service: 'Electrician', rating: 4.8 },
-    { id: '2', name: 'Suresh Plumber', service: 'Plumber', rating: 4.5 }
-  ], 
-  removeFavorite: (id: string) => console.log('Remove', id) 
-});
+import { LinearGradient } from 'expo-linear-gradient';
+import { 
+  Search, 
+  Star, 
+  Heart, 
+} from 'lucide-react-native';
+
+const headerImage = require('../../assets/images/favorite_bg.png');
+
+const initialFavorites = [
+  { id: '1', name: 'Marcus Johnson', service: 'Master Plumber', rating: 4.9, reviews: 124, image: 'https://randomuser.me/api/portraits/men/1.jpg' },
+  { id: '2', name: 'Sarah Davis', service: 'Certified Electrician', rating: 5.0, reviews: 89, image: 'https://randomuser.me/api/portraits/women/2.jpg' },
+  { id: '3', name: 'David Chen', service: 'HVAC Specialist', rating: 4.8, reviews: 210, image: 'https://randomuser.me/api/portraits/men/3.jpg' },
+  { id: '4', name: 'Emily Wilson', service: 'Home Cleaning', rating: 4.7, reviews: 56, image: 'https://randomuser.me/api/portraits/women/4.jpg' },
+];
 
 export default function FavoritesPage() {
-  const { t } = useLanguage();
-  const { favorites, removeFavorite } = useFavorites();
+  const [favorites, setFavorites] = useState(initialFavorites);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const toggleFavorite = (id: string) => {
+    setFavorites(favorites.filter(item => item.id !== id));
+  };
+
+  const filteredFavorites = favorites.filter(item => 
+    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.service.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header Placeholder - You can import your mobile Header component here */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>{t('favorites')}</Text>
-        <Text style={styles.headerSub}>Your saved services and providers</Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      
+      <View style={styles.headerWrapper}>
+        <Image 
+          source={headerImage}
+          style={styles.headerImage} 
+          resizeMode="cover"
+        />
+
+        <LinearGradient
+          colors={['transparent', 'rgba(255, 243, 230, 0.1)', 'rgba(234, 88, 12, 0.9)']} 
+          locations={[0, 0.6, 1.0]}
+          style={styles.headerGradient}
+        />
+
+        <SafeAreaView style={styles.headerContent}>
+          <View style={styles.headerTop}>
+            <View style={styles.textLeftPadding}>
+              <Text style={styles.headerTitle}>Favorites</Text>
+              <Text style={styles.headerSubtitle}>Your trusted professionals</Text>
+            </View>
+          </View>
+        </SafeAreaView>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {favorites.length > 0 ? (
-          <View style={styles.list}>
-            {favorites.map((item) => (
-              <View key={item.id} style={styles.card}>
-                {/* Avatar */}
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
-                </View>
+      <View style={styles.contentArea}>
+        <View style={styles.dragIndicator} />
+        
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Search size={18} color="#94a3b8" style={styles.searchIcon} />
+            <TextInput
+              placeholder="Search providers..."
+              placeholderTextColor="#94a3b8"
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
 
-                {/* Details */}
-                <View style={styles.details}>
-                  <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.service}>{item.service}</Text>
-                </View>
-
-                {/* Actions */}
-                <View style={styles.actions}>
-                  {item.rating && (
-                    <View style={styles.ratingBadge}>
-                      <Star size={12} color="#FF7A00" fill="#FF7A00" />
-                      <Text style={styles.ratingText}>{item.rating}</Text>
-                    </View>
-                  )}
-                  
-                  <TouchableOpacity 
-                    style={styles.removeBtn} 
-                    onPress={() => removeFavorite(item.id)}
-                  >
-                    <Heart size={20} color="#EF4444" fill="#EF4444" />
-                  </TouchableOpacity>
-                  
-                  <ChevronRight size={20} color="#9CA3AF" />
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listContainer}
+        >
+          {filteredFavorites.map((item) => (
+            <View key={item.id} style={styles.card}>
+              <Image source={{ uri: item.image }} style={styles.avatar} />
+              
+              <View style={styles.details}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.serviceName}>{item.service}</Text>
+                <View style={styles.ratingRow}>
+                  <Star size={14} color="#facc15" fill="#facc15" />
+                  <Text style={styles.ratingText}>{item.rating}</Text>
+                  <Text style={styles.reviewText}>({item.reviews} reviews)</Text>
                 </View>
               </View>
-            ))}
-          </View>
-        ) : (
-          /* Empty State */
-          <View style={styles.emptyContainer}>
-            <View style={styles.emptyIconCircle}>
-              <Heart size={40} color="#FF7A00" />
-            </View>
-            <Text style={styles.emptyTitle}>No favorites yet</Text>
-            <Text style={styles.emptySub}>
-              Save your favorite services and providers here for quick access
-            </Text>
-          </View>
-        )}
-      </ScrollView>
 
-      {/* BottomNav is handled automatically by the (tabs) folder structure in Expo Router */}
-    </SafeAreaView>
+              <TouchableOpacity 
+                onPress={() => toggleFavorite(item.id)}
+                style={styles.heartBtn}
+              >
+                <Heart size={22} color="#ef4444" fill="#ef4444" />
+              </TouchableOpacity>
+            </View>
+          ))}
+          
+          {filteredFavorites.length === 0 && (
+            <View style={styles.emptyState}>
+              <Heart size={64} color="#e2e8f0" />
+              <Text style={styles.emptyText}>No favorites found</Text>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    backgroundColor: '#ffffff',
   },
-  header: {
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#FFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEE',
+  headerWrapper: {
+    height: '38%',
+    width: '100%',
+    position: 'relative',
+    backgroundColor: '#FFF3E6',
+  },
+  headerImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+  },
+  headerGradient: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  headerContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    marginTop: 20,
+  },
+  textLeftPadding: {
+    paddingLeft: 4,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: 'bold',
     color: '#111827',
+    letterSpacing: -0.5,
   },
-  headerSub: {
-    fontSize: 14,
-    color: '#6B7280',
+  headerSubtitle: {
+    fontSize: 15,
+    color: '#4B5563',
+    fontWeight: '600',
     marginTop: 4,
   },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100, // Space for the bottom tabs
+  contentArea: {
+    flex: 1,
+    marginTop: -50,
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -12 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 15,
   },
-  list: {
-    gap: 12,
+  dragIndicator: {
+    width: 44,
+    height: 5,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 3,
+    alignSelf: 'center',
+    marginTop: 14,
+  },
+  searchContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 8,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 56,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    backgroundColor: '#f8fafc',
+    paddingHorizontal: 16,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#1e293b',
+  },
+  listContainer: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 120,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 24,
+    backgroundColor: 'white',
     borderWidth: 1,
-    borderColor: '#F3F4F6',
-    elevation: 2, // Shadow for Android
-    shadowColor: '#000', // Shadow for iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    borderColor: '#f1f5f9',
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 12,
+    elevation: 3,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#FFEBDC',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    color: '#FF7A00',
-    fontSize: 20,
-    fontWeight: 'bold',
+    width: 68,
+    height: 68,
+    borderRadius: 18,
   },
   details: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 16,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111827',
+    fontSize: 19,
+    color: '#0f172a',
   },
-  service: {
+  serviceName: {
     fontSize: 14,
-    color: '#6B7280',
-    marginTop: 2,
+    color: '#f97316',
+    marginVertical: 3,
   },
-  actions: {
+  ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  ratingBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 20,
     gap: 4,
   },
   ratingText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#1e293b',
+  },
+  reviewText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
+    color: '#94a3b8',
+    marginLeft: 2,
   },
-  removeBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
+  heartBtn: {
+    padding: 10,
   },
-  emptyContainer: {
+  emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 80,
-    paddingHorizontal: 40,
   },
-  emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  emptySub: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
+  emptyText: {
+    marginTop: 16,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#64748b',
   },
 });

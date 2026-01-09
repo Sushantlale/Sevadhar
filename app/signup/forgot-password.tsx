@@ -2,7 +2,6 @@ import { useRouter } from 'expo-router';
 import { ArrowLeft, Eye, EyeOff, Lock, Phone, ShieldCheck } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Alert,
     KeyboardAvoidingView,
     Platform,
     SafeAreaView,
@@ -26,39 +25,62 @@ export default function ForgotPasswordScreen() {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Custom Popup State
+    const [toast, setToast] = useState<{ msg: string; title: string; type: 'error' | 'success' } | null>(null);
+
+    const showPopup = (title: string, msg: string, type: 'error' | 'success' = 'error') => {
+        setToast({ title, msg, type });
+        setTimeout(() => setToast(null), 4000);
+    };
+
     const handleSendCode = () => {
-        if (phone.length !== 10) {
-            Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
+        if (!phone || phone.length !== 10) {
+            showPopup("Invalid Phone", "Please enter a valid 10-digit phone number", "error");
             return;
         }
-        setStep(1); // Proceed to 6-digit verification
+        showPopup("OTP Sent", "A 6-digit code has been sent to your phone", "success");
+        setStep(1); 
     };
 
     const handleVerifyOtp = () => {
-        if (otp.length !== 6) {
-            Alert.alert("Field Required", "Please fill all mandatory fields marked with *");
+        if (!otp || otp.length !== 6) {
+            showPopup("Field Required", "Please enter the 6-digit verification code", "error");
             return;
         }
-        setStep(2); // Proceed to Password Reset
+        showPopup("Verified", "Phone number verified successfully", "success");
+        setStep(2); 
     };
 
     const handleResetPassword = () => {
         if (!newPassword || !confirmPassword) {
-            Alert.alert("Field Required", "Please fill all mandatory fields marked with *");
+            showPopup("Field Required", "Please fill all mandatory fields marked with *", "error");
             return;
         }
         if (newPassword !== confirmPassword) {
-            Alert.alert("Mismatch", "Passwords do not match");
+            showPopup("Mismatch", "Passwords do not match", "error");
             return;
         }
-        Alert.alert("Success", "Password updated! Please sign in.", [
-            { text: "OK", onPress: () => router.push('/login' as any) }
-        ]);
+        
+        showPopup("Success", "Password updated! Redirecting to login...", "success");
+        
+        // Brief delay to let user see the success message
+        setTimeout(() => {
+            router.push('/login' as any);
+        }, 1500);
     };
 
     return (
         <SafeAreaView style={styles.container}>
             <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+                
+                {/* Custom Pop-up UI */}
+                {toast && (
+                  <View style={[styles.toast, toast.type === 'error' ? styles.errorBg : styles.successBg]}>
+                    <Text style={styles.toastTitle}>{toast.title}</Text>
+                    <Text style={styles.toastMsg}>{toast.msg}</Text>
+                  </View>
+                )}
+
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => step > 0 ? setStep(step - 1) : router.back()}>
                         <ArrowLeft size={24} color="#333" />
@@ -71,32 +93,28 @@ export default function ForgotPasswordScreen() {
                 <ScrollView contentContainerStyle={styles.scroll}>
                     <View style={styles.iconContainer}><ShieldCheck size={60} color="#FF7A00" /></View>
 
-                   {step === 0 && (
-    /* NEW STEP 0: PHONE NUMBER ENTRY */
-                 <View style={styles.formSection}>
-                     <Text style={styles.title}>Enter Phone Number <Text style={styles.red}>*</Text></Text>
-                      <Text style={styles.subtitle}>We will send a 6-digit code to verify your account.</Text>
-                       <View style={styles.inputWrapper}>
-                           <Phone size={20} color="#9CA3AF" />
-                          <TextInput
-                             placeholder="Enter Registered Phone Number"
-                              keyboardType="phone-pad"
-                              maxLength={10}
-                              style={styles.input}
-                             value={phone}
-                             onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
-                             returnKeyType="done"
-                             onSubmitEditing={handleSendCode}
-                         />
-                         </View>
-                      <TouchableOpacity style={styles.submitBtn} onPress={handleSendCode}>
-                       <Text style={styles.submitBtnText}>Send Verification Code</Text>
-                         </TouchableOpacity>
-                 </View>
-                )}
+                    {step === 0 && (
+                        <View style={styles.formSection}>
+                            <Text style={styles.title}>Enter Phone Number <Text style={styles.red}>*</Text></Text>
+                            <Text style={styles.subtitle}>We will send a 6-digit code to verify your account.</Text>
+                            <View style={styles.inputWrapper}>
+                                <Phone size={20} color="#9CA3AF" />
+                                <TextInput
+                                    placeholder="Enter Registered Phone Number"
+                                    keyboardType="phone-pad"
+                                    maxLength={10}
+                                    style={styles.input}
+                                    value={phone}
+                                    onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+                                />
+                            </View>
+                            <TouchableOpacity style={styles.submitBtn} onPress={handleSendCode}>
+                                <Text style={styles.submitBtnText}>Send Verification Code</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
 
                     {step === 1 && (
-                        /* STEP 1: 6-DIGIT VERIFICATION */
                         <View style={styles.formSection}>
                             <Text style={styles.title}>Enter 6-Digit Code <Text style={styles.red}>*</Text></Text>
                             <Text style={styles.subtitle}>Code sent to {phone}</Text>
@@ -108,7 +126,6 @@ export default function ForgotPasswordScreen() {
                                     style={styles.otpInput}
                                     value={otp}
                                     onChangeText={setOtp}
-                                    onSubmitEditing={handleVerifyOtp}
                                 />
                             </View>
                             <TouchableOpacity style={styles.submitBtn} onPress={handleVerifyOtp}>
@@ -118,7 +135,6 @@ export default function ForgotPasswordScreen() {
                     )}
 
                     {step === 2 && (
-                        /* STEP 2: PASSWORD RESET */
                         <View style={styles.formSection}>
                             <Text style={styles.title}>Create New Password</Text>
                             <Text style={styles.label}>Phone Number</Text>
@@ -126,6 +142,7 @@ export default function ForgotPasswordScreen() {
                                 <Phone size={20} color="#999" />
                                 <Text style={styles.disabledText}>{phone}</Text>
                             </View>
+                            
                             <Text style={styles.label}>New Password <Text style={styles.red}>*</Text></Text>
                             <View style={styles.inputWrapper}>
                                 <Lock size={20} color="#9CA3AF" />
@@ -140,6 +157,7 @@ export default function ForgotPasswordScreen() {
                                     {showNewPassword ? <EyeOff size={20} color="#9CA3AF" /> : <Eye size={20} color="#9CA3AF" />}
                                 </TouchableOpacity>
                             </View>
+
                             <Text style={styles.label}>Confirm Password <Text style={styles.red}>*</Text></Text>
                             <View style={styles.inputWrapper}>
                                 <Lock size={20} color="#9CA3AF" />
@@ -154,6 +172,7 @@ export default function ForgotPasswordScreen() {
                                     {showConfirmPassword ? <EyeOff size={20} color="#9CA3AF" /> : <Eye size={20} color="#9CA3AF" />}
                                 </TouchableOpacity>
                             </View>
+
                             <TouchableOpacity style={styles.submitBtn} onPress={handleResetPassword}>
                                 <Text style={styles.submitBtnText}>Update Password</Text>
                             </TouchableOpacity>
@@ -167,6 +186,13 @@ export default function ForgotPasswordScreen() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#FAF9F6' },
+    // Pop-up Notification Styles
+    toast: { position: 'absolute', top: 50, left: 20, right: 20, padding: 15, borderRadius: 12, zIndex: 999, elevation: 10 },
+    errorBg: { backgroundColor: '#EF4444' },
+    successBg: { backgroundColor: '#10B981' },
+    toastTitle: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+    toastMsg: { color: '#FFF', fontSize: 13, marginTop: 2 },
+
     header: { flexDirection: 'row', alignItems: 'center', padding: 20, paddingTop: 50, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#EEE' },
     headerTitle: { fontSize: 18, fontWeight: 'bold', marginLeft: 15 },
     scroll: { padding: 25, flexGrow: 1, alignItems: 'center' },
