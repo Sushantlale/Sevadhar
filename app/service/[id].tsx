@@ -1,28 +1,29 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-  ArrowLeft,
-  BadgeCheck,
-  ChevronDown,
-  Heart,
-  Mic,
-  Phone,
-  Play,
-  Search,
-  SlidersHorizontal,
-  Star
+    ArrowLeft,
+    BadgeCheck,
+    ChevronDown,
+    Heart,
+    Mic,
+    Phone,
+    Play,
+    Search,
+    SlidersHorizontal,
+    Star
 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
-  Image,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Dimensions,
+    FlatList,
+    Image,
+    Platform,
+    SafeAreaView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -151,7 +152,7 @@ export default function ServiceListingPage() {
                 <View style={styles.headerTitleCenter}>
                     <Text style={styles.headerTitleMain}>{serviceName}</Text>
                     <TouchableOpacity style={styles.locSelector}>
-                        <Text style={styles.locSelectorText}>San Francisco</Text>
+                        <Text style={styles.locSelectorText}>Khopoli</Text>
                         <ChevronDown size={14} color="#6B7280" />
                     </TouchableOpacity>
                 </View>
@@ -223,7 +224,7 @@ export default function ServiceListingPage() {
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F7F5' },
-    headerNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 10, height: 60 },
+    headerNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 4 : 10, height: 60 },
     backCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
     headerTitleCenter: { alignItems: 'center' },
     headerTitleMain: { fontSize: 18, fontWeight: '800', color: '#111' },

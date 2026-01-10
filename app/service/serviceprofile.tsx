@@ -4,6 +4,7 @@ import React from 'react';
 import {
   Dimensions,
   Image,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -67,7 +68,7 @@ const ProfileDetails = () => {
               </View>
               <View style={styles.statsRow}>
                 <View style={styles.ratingBadge}>
-                  <MaterialIcons name="star" size={12} color="#FFF" />
+                  <MaterialIcons name="star" size={12} color="#FF7A00" />
                   <Text style={styles.ratingText}>{rating}</Text>
                 </View>
                 <View style={styles.jobRow}>
@@ -263,6 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 10 : 10,
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#111' },
   headerRight: { flexDirection: 'row', gap: 5 },
@@ -302,15 +304,16 @@ const styles = StyleSheet.create({
   locText: { fontSize: 13, color: '#666', marginLeft: 4 },
   statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   ratingBadge: {
-    backgroundColor: '#16A34A',
+    backgroundColor: '#ffffff',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
     marginRight: 15,
+    borderColor: '#000000',
   },
-  ratingText: { color: '#FFF', fontSize: 12, fontWeight: 'bold', marginLeft: 3 },
+  ratingText: { color: '#000000', fontSize: 12, fontWeight: 'bold', marginLeft: 3 },
   jobRow: { flexDirection: 'row', alignItems: 'center' },
   jobText: { fontSize: 13, color: '#666', marginLeft: 5 },
   playBtn: {
@@ -394,7 +397,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, 
     borderColor: '#F0F0F0' 
   },
-  ratingBox: { width: 58, height: 58, backgroundColor: '#16A34A', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  ratingBox: { width: 58, height: 58, backgroundColor: '#1629a3', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   ratingBigText: { color: '#FFF', fontSize: 24, fontWeight: 'bold' },
   ratingCount: { fontSize: 18, fontWeight: 'bold', color: '#111' },
   subInfoText: { fontSize: 12, color: '#6B7280', lineHeight: 18 },

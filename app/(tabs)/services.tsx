@@ -1,7 +1,5 @@
 import { useRouter } from 'expo-router';
-
 import {
-  ArrowLeft,
   BookOpen,
   Briefcase,
   Calendar,
@@ -15,6 +13,7 @@ import {
   Home,
   Layers,
   Leaf,
+  MapPin,
   Mic,
   Scissors,
   Search,
@@ -24,21 +23,22 @@ import {
   Trash2,
   Truck,
   Users,
-  Wrench,
-  X
+  Wrench
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
-  Modal,
+  ImageBackground,
+  Platform,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -491,273 +491,248 @@ const categories = [
 
 export default function ServicesPage() {
   const router = useRouter();
-  
-  // Tab State
   const [activeTab, setActiveTab] = useState<'local' | 'pro' | 'shops'>('local');
-
-  // Search & Voice States
-  const [isSearchVisible, setSearchVisible] = useState(false);
-  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
-  const [voiceStep, setVoiceStep] = useState<'listening' | 'result'>('listening');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filtering Logic based on Section Switcher
+  const groupIntoVerticalPairs = (items: any[]) => {
+    const pairs = [];
+    for (let i = 0; i < items.length; i += 2) {
+      pairs.push(items.slice(i, i + 2));
+    }
+    return pairs;
+  };
+
   const filteredCategories = categories.filter(cat => {
     const id = parseInt(cat.id);
     let inTab = false;
     if (activeTab === 'local') inTab = id <= 14;
     else if (activeTab === 'pro') inTab = id >= 15 && id <= 17;
     else if (activeTab === 'shops') inTab = id >= 18;
-
+    
     if (!inTab) return false;
-
     return cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
            cat.services.some(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
-  const handleVoiceTrigger = () => {
-    setVoiceStep('listening');
-    setVoiceModalVisible(true);
-    setTimeout(() => { setVoiceStep('result'); }, 2000);
-  };
-
-  // Helper function to group services into pairs for vertical stack
-  const groupInPairs = (arr: any[]) => {
-    const pairs = [];
-    for (let i = 0; i < arr.length; i += 2) {
-      pairs.push(arr.slice(i, i + 2));
-    }
-    return pairs;
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 1. STICKY HEADER & SEARCH BAR */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Services</Text>
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+      
+      <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+        {/* 1. HEADER SECTION - Adjusted for visibility */}
+        <ImageBackground 
+          source={require("../../assets/images/header-bg.png")} 
+          style={styles.heroBg}
+        >
+          <SafeAreaView style={styles.heroSafeArea}>
+            <View style={styles.topRow}>
+              <View style={styles.locationContainer}>
+                <MapPin size={16} color="#FFF" />
+                <Text style={styles.locationText}>Khopoli</Text>
+              </View>
+              {/* <Image 
+                source={{ uri: 'https://i.pravatar.cc/150?u=avatar' }} 
+                style={styles.avatar} 
+              /> */}
+            </View>
 
-        <View style={styles.searchRow}>
-          <TouchableOpacity 
-            activeOpacity={1} 
-            style={styles.searchBar} 
-            onPress={() => setSearchVisible(true)}
-          >
-            <Search size={20} color="#999" />
-            <Text style={styles.searchPlaceholderText}>{searchQuery || "Search for services..."}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.micBtn} onPress={handleVoiceTrigger}>
-            <Mic size={22} color="#FFF" />
-          </TouchableOpacity>
-        </View>
+            <Text style={styles.heroText}>Which Services are{"\n"}You Searching For?</Text>
 
-        {/* 2. SECTION SWITCHER */}
-        <View style={styles.tabWrapper}>
-          <TouchableOpacity 
-            style={[styles.tab, activeTab === 'local' && styles.activeTab]} 
-            onPress={() => setActiveTab('local')}
-          >
-            <Text style={[styles.tabText, activeTab === 'local' && styles.activeTabText]}>Local Workers</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tab, activeTab === 'pro' && styles.activeTab]} 
-            onPress={() => setActiveTab('pro')}
-          >
-            <Text style={[styles.tabText, activeTab === 'pro' && styles.activeTabText]}>Professional Services</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.tab, activeTab === 'shops' && styles.activeTab]} 
-            onPress={() => setActiveTab('shops')}
-          >
-            <Text style={[styles.tabText, activeTab === 'shops' && styles.activeTabText]}>Shops</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+            <View style={styles.heroSearchContainer}>
+              <View style={styles.heroSearchBar}>
+                <Search size={20} color="#FFF" style={{ marginRight: 10 }} />
+                <TextInput
+                  placeholder="Search services"
+                  placeholderTextColor="#DDD"
+                  style={styles.heroInput}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+              </View>
+              <TouchableOpacity style={styles.heroMicBtn}>
+                <Mic size={22} color="#FFF" />
+              </TouchableOpacity>
+            </View>
 
-      {/* 3. CONTENT AREA WITH VERTICAL STACK CAROUSEL */}
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {filteredCategories.length > 0 ? (
-          filteredCategories.map(category => (
+            {/* Tab Section - Horizontal Scrollable */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll}>
+              <View style={styles.tabContainer}>
+                <TouchableOpacity 
+                  style={[styles.tabBtn, activeTab === 'local' && styles.tabBtnActive]} 
+                  onPress={() => setActiveTab('local')}
+                >
+                  <Text style={[styles.tabBtnText, activeTab === 'local' && styles.tabBtnTextActive]}>Local Workers</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.tabBtn, activeTab === 'pro' && styles.tabBtnActive]} 
+                  onPress={() => setActiveTab('pro')}
+                >
+                  <Text style={[styles.tabBtnText, activeTab === 'pro' && styles.tabBtnTextActive]}>Professional Services</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.tabBtn, activeTab === 'shops' && styles.tabBtnActive]} 
+                  onPress={() => setActiveTab('shops')}
+                >
+                  <Text style={[styles.tabBtnText, activeTab === 'shops' && styles.tabBtnTextActive]}>Shops</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </ImageBackground>
+
+        {/* 2. SERVICES SECTION */}
+        <View style={styles.contentArea}>
+          {filteredCategories.map(category => (
             <View key={category.id} style={styles.section}>
               <View style={styles.categoryHeader}>
                 <Text style={styles.categoryTitle}>{category.name}</Text>
-                <TouchableOpacity><Text style={styles.viewAllText}>View All</Text></TouchableOpacity>
+                {/* <TouchableOpacity><Text style={styles.viewAllText}>View All</Text></TouchableOpacity> */}
               </View>
-
-              <View style={styles.carouselContainer}>
+        
+              {/* Container for ScrollView and Arrows */}
+              <View style={styles.carouselWrapper}>
+                {/* Left Arrow */}
+                <TouchableOpacity style={[styles.navArrow, styles.leftArrow]} activeOpacity={0.8}>
+                  <ChevronLeft size={20} color="#333" />
+                </TouchableOpacity>
+        
                 <ScrollView 
                   horizontal 
                   showsHorizontalScrollIndicator={false} 
-                  snapToInterval={ITEM_WIDTH + 12}
+                  contentContainerStyle={styles.serviceScrollContent}
+                  // Enable snapping for a cleaner "carousel" feel like your image
+                  snapToInterval={width * 0.44 + 15} 
                   decelerationRate="fast"
-                  contentContainerStyle={{ paddingLeft: 16 }}
                 >
-                  {groupInPairs(category.services).map((pair, index) => (
-                    <View key={index} style={styles.verticalBlock}>
+                  {groupIntoVerticalPairs(category.services).map((pair, index) => (
+                    <View key={index} style={styles.verticalColumn}>
                       {pair.map((service) => (
                         <TouchableOpacity 
                           key={service.slug} 
                           style={styles.serviceCard}
                           onPress={() => router.push({ pathname: '/service/[id]', params: { id: service.slug } } as any)}
                         >
-                          <View style={styles.imgWrapper}>
-                            {service.image ? (
-                              <Image 
-                                source={typeof service.image === 'string' ? { uri: service.image } : service.image} 
-                                style={styles.serviceImage} 
-                              />
-                            ) : (
-                              <View style={styles.imagePlaceholder} />
-                            )}
+                          <View style={styles.cardImageContainer}>
+                            <Image source={service.image} style={styles.cardImage} resizeMode="cover" />
                           </View>
-                          <Text style={styles.serviceName} numberOfLines={1}>{service.name}</Text>
+                          <View style={styles.cardTextContainer}>
+                            <Text style={styles.cardName} numberOfLines={1}>{service.name}</Text>
+                          </View>
                         </TouchableOpacity>
                       ))}
                     </View>
                   ))}
                 </ScrollView>
-                
-                {/* Navigation Hint Arrows */}
-                <View style={[styles.navArrow, { left: 0 }]}><ChevronLeft size={16} color="#333" /></View>
-                <View style={[styles.navArrow, { right: 0 }]}><ChevronRight size={16} color="#333" /></View>
+        
+                {/* Right Arrow */}
+                <TouchableOpacity style={[styles.navArrow, styles.rightArrow]} activeOpacity={0.8}>
+                  <ChevronRight size={20} color="#333" />
+                </TouchableOpacity>
               </View>
             </View>
-          ))
-        ) : (
-          <View style={styles.noResultContainer}>
-             <Text style={styles.noResultText}>No services found in this section.</Text>
-          </View>
-        )}
-      </ScrollView>
-
-      {/* 4. MODAL: SEARCH OVERLAY (FROM HOME PAGE) */}
-      <Modal visible={isSearchVisible} animationType="slide" onRequestClose={() => setSearchVisible(false)}>
-        <SafeAreaView style={styles.searchOverlay}>
-          <View style={styles.searchHeaderOverlay}>
-            <TouchableOpacity onPress={() => setSearchVisible(false)}><ArrowLeft size={24} color="#333" /></TouchableOpacity>
-            <Text style={styles.searchTitleOverlay}>Search</Text>
-          </View>
-
-          <View style={styles.searchInputContainerOverlay}>
-            <Search size={22} color="#666" style={{ marginRight: 10 }} />
-            <TextInput 
-              placeholder="Find Electrician, Maid, or Shop..." 
-              style={styles.fullSearchInput} 
-              autoFocus={true} 
-              value={searchQuery} 
-              onChangeText={setSearchQuery} 
-            />
-          </View>
-
-          <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
-            <Text style={styles.searchSectionTitle}>Your history</Text>
-            <View style={styles.pillsRow}>
-              {['Maid', 'Cook', 'Plumber', 'Electrician'].map((text, i) => (
-                <TouchableOpacity key={i} style={styles.pill} onPress={() => {setSearchQuery(text); setSearchVisible(false);}}>
-                  <Text style={styles.pillText}>{text}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.searchSectionTitle}>Search by category</Text>
-            <View style={styles.searchGridOverlay}>
-              {sevadharCategories.map((item) => (
-                <TouchableOpacity key={item.id} style={styles.searchGridItemOverlay} onPress={() => { setSearchQuery(item.name); setSearchVisible(false); }}>
-                  <item.icon size={22} color={item.color} style={{ marginRight: 12 }} />
-                  <Text style={styles.searchGridTextOverlay}>{item.name}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.searchSectionTitle}>Trending searches</Text>
-            <View style={styles.pillsRow}>
-              {['AC Repair', 'Deep Clean', 'Mali', 'Doctor', 'Tailor', 'Pandit'].map((text, i) => (
-                <TouchableOpacity key={i} style={styles.pill} onPress={() => {setSearchQuery(text); setSearchVisible(false);}}>
-                  <Text style={styles.pillText}>{text}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
-      {/* 5. MODAL: VOICE SEARCH */}
-      <Modal visible={voiceModalVisible} transparent={true} animationType="fade">
-        <View style={styles.voiceOverlayBg}>
-          <View style={styles.voiceContainer}>
-            <TouchableOpacity style={styles.closeVoice} onPress={() => setVoiceModalVisible(false)}><X size={24} color="#666" /></TouchableOpacity>
-            <Text style={styles.voiceTitle}>Voice Search</Text>
-            {voiceStep === 'listening' ? (
-              <><Text style={styles.voiceInstruction}>Listening...</Text><View style={styles.voiceMicCircle}><Mic size={40} color="#FFF" /></View></>
-            ) : (
-              <><Text style={styles.voiceInstruction}>Search result:</Text><View style={styles.voiceResultBox}><Text style={styles.voiceResultText}>"Plumber"</Text></View>
-                <View style={styles.voiceActionRow}><TouchableOpacity style={styles.voiceTryAgain} onPress={() => setVoiceStep('listening')}><Text style={styles.tryAgainText}>Try Again</Text></TouchableOpacity>
-                  <TouchableOpacity style={styles.voiceSearchBtn} onPress={() => { setVoiceModalVisible(false); setSearchQuery('Plumber'); }}><Text style={styles.searchBtnText}>Search</Text></TouchableOpacity></View></>
-            )}
-          </View>
+          ))}
         </View>
-      </Modal>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF' },
-  header: { paddingTop: 40, paddingHorizontal: 16, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  headerTitle: { fontSize: 28, fontWeight: 'bold', marginBottom: 16 },
-  searchRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  searchBar: { flex: 1, flexDirection: 'row', backgroundColor: '#F3F4F6', borderRadius: 16, paddingHorizontal: 16, alignItems: 'center', height: 54, borderWidth: 1, borderColor: '#E5E7EB' },
-  searchPlaceholderText: { flex: 1, marginLeft: 10, fontSize: 16, color: '#999' },
-  micBtn: { width: 54, height: 54, borderRadius: 16, backgroundColor: '#FF7A00', alignItems: 'center', justifyContent: 'center' },
-  tabWrapper: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
-  tab: { flex: 1, paddingVertical: 12, alignItems: 'center', borderBottomWidth: 2, borderBottomColor: 'transparent' },
-  activeTab: { borderBottomColor: '#FF7A00' },
-  tabText: { fontSize: 12, fontWeight: 'bold', color: '#888' },
-  activeTabText: { color: '#FF7A00' },
+  // Increased height and ensured safe area padding for visibility
+  heroBg: { width: '100%', minHeight: 325, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
+  heroSafeArea: { flex: 1, paddingHorizontal: 8, paddingBottom: 10 },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 15 },
+  locationContainer: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  locationText: { color: '#FFF', fontSize: 16, fontWeight: '500' },
+  avatar: { width: 45, height: 45, borderRadius: 22.5, borderWidth: 1, borderColor: '#FFF' },
+  heroText: { color: '#FFF', fontSize: 36, fontWeight: 'bold', marginTop: 25, lineHeight: 42 },
+  
+  heroSearchContainer: { flexDirection: 'row', marginTop: 25, gap: 12 },
+  heroSearchBar: { 
+    flex: 1, 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: 'rgba(255,255,255,0.25)', 
+    height: 55, 
+    borderRadius: 35, 
+    paddingHorizontal: 20, 
+    borderWidth: 1, 
+    borderColor: 'rgba(255,255,255,0.3)' 
+  },
+  heroInput: { flex: 1, color: '#FFF', fontSize: 15, fontWeight: '500' },
+  heroMicBtn: { width: 55, height: 55, borderRadius: 32.5, backgroundColor: '#FF7A00', justifyContent: 'center', alignItems: 'center' },
 
-  scrollContent: { paddingBottom: 100 },
-  section: { marginTop: 24 },
+  tabScroll: { marginTop: 20 },
+  tabContainer: { flexDirection: 'row', gap: 5, paddingRight: 20 },
+  tabBtn: { paddingHorizontal: 10, paddingVertical: 12, borderRadius: 30, backgroundColor: 'rgba(255,255,255,0.2)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
+  tabBtnActive: { backgroundColor: '#FF7A00', borderColor: '#FF7A00' },
+  tabBtnText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
+  tabBtnTextActive: { color: '#FFF' },
+
+  contentArea: { paddingBottom: 80, marginTop: 10 },
+  section: { marginTop: 25 },
   categoryHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 15 },
-  categoryTitle: { fontSize: 17, fontWeight: 'bold', color: '#111' },
-  viewAllText: { fontSize: 13, color: '#FF7A00', fontWeight: 'bold' },
+  categoryTitle: { fontSize: 20, fontWeight: 'bold', color: '#111' },
+  viewAllText: { fontSize: 16, color: '#FF7A00', fontWeight: 'bold' },
 
-  // Carousel Vertical Stack Styles
-  carouselContainer: { position: 'relative' },
-  verticalBlock: { width: ITEM_WIDTH, marginRight: 12, gap: 12 },
-  serviceCard: { width: '100%', backgroundColor: '#FFF', borderRadius: 15, padding: 8, borderWidth: 1, borderColor: '#F0F0F0', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4 },
-  imgWrapper: { height: ITEM_WIDTH * 0.55, borderRadius: 10, overflow: 'hidden', backgroundColor: '#F9FAFB' },
-  serviceImage: { width: '100%', height: '100%' },
-  imagePlaceholder: { flex: 1, backgroundColor: '#EEE' },
-  serviceName: { fontSize: 12, fontWeight: 'bold', color: '#333', textAlign: 'center', marginTop: 8 },
-  navArrow: { position: 'absolute', top: '40%', backgroundColor: 'rgba(255,255,255,0.8)', width: 28, height: 28, borderRadius: 14, justifyContent: 'center', alignItems: 'center', elevation: 3, zIndex: 10 },
+  serviceScrollContent: { paddingLeft: 16 },
+  verticalColumn: { flexDirection: 'column', marginRight: 15, gap: 15 },
+  // Card styling: removed padding to let image fill space
+  serviceCard: { 
+    width: width * 0.44, 
+    backgroundColor: '#FFF', 
+    borderRadius: 20, 
+    borderWidth: 1, 
+    borderColor: '#F0F0F0', 
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    overflow: 'hidden' // Important to wrap the image
+  },
+  cardImageContainer: { width: '100%', height: 130 },
+  cardImage: { width: '100%', height: '100%' },
+  heartBtn: { position: 'absolute', top: 10, right: 10, backgroundColor: 'rgba(0,0,0,0.3)', padding: 6, borderRadius: 20 },
+  cardTextContainer: { paddingVertical: 10, paddingHorizontal: 5 },
+  cardName: { fontSize: 14, fontWeight: 'bold', color: '#111', textAlign: 'center' },
 
-  noResultContainer: { marginTop: 50, alignItems: 'center' },
-  noResultText: { color: '#666', fontSize: 14 },
-
-  // Modal Styles (From Home Page)
-  searchOverlay: { flex: 1, backgroundColor: '#FFF' },
-  searchHeaderOverlay: { flexDirection: 'row', alignItems: 'center', padding: 16 },
-  searchTitleOverlay: { fontSize: 20, fontWeight: 'bold', marginLeft: 16 },
-  searchInputContainerOverlay: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F3F4F6', marginHorizontal: 16, borderRadius: 30, paddingHorizontal: 16, height: 50, marginBottom: 20, borderWidth: 1, borderColor: '#EEE' },
-  fullSearchInput: { flex: 1, fontSize: 16 },
-  searchSectionTitle: { fontSize: 18, fontWeight: 'bold', marginVertical: 15 },
-  pillsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  pill: { backgroundColor: '#F3F4F6', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB' },
-  pillText: { fontSize: 14, color: '#444' },
-  searchGridOverlay: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  searchGridItemOverlay: { width: '48%', flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', padding: 15, borderRadius: 15, borderWidth: 1, borderColor: '#EEE', marginBottom: 12 },
-  searchGridTextOverlay: { fontSize: 13, fontWeight: '600', color: '#333' },
-
-  voiceOverlayBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  voiceContainer: { width: width * 0.85, backgroundColor: '#FFF', borderRadius: 25, padding: 24, alignItems: 'center' },
-  closeVoice: { alignSelf: 'flex-end' },
-  voiceTitle: { fontSize: 24, fontWeight: 'bold', color: '#333', marginBottom: 5 },
-  voiceInstruction: { fontSize: 16, color: '#666', marginBottom: 30 },
-  voiceMicCircle: { width: 100, height: 100, borderRadius: 50, backgroundColor: '#FF7A00', justifyContent: 'center', alignItems: 'center', elevation: 5 },
-  voiceResultBox: { backgroundColor: '#FFF7ED', padding: 20, borderRadius: 12, width: '100%', marginBottom: 30 },
-  voiceResultText: { fontSize: 22, fontWeight: 'bold', color: '#333', textAlign: 'center' },
-  voiceActionRow: { flexDirection: 'row', gap: 15, width: '100%' },
-  voiceTryAgain: { flex: 1, height: 50, borderRadius: 12, borderWidth: 1, borderColor: '#FF7A00', justifyContent: 'center', alignItems: 'center' },
-  tryAgainText: { color: '#FF7A00', fontWeight: 'bold' },
-  voiceSearchBtn: { flex: 1, height: 50, borderRadius: 12, backgroundColor: '#FF7A00', justifyContent: 'center', alignItems: 'center' },
-  searchBtnText: { color: '#FFF', fontWeight: 'bold' }
+  carouselWrapper: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  navArrow: {
+    position: 'absolute',
+    zIndex: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#FFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Shadow to make it look like the physical buttons in your image
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+  leftArrow: {
+    left: 5,
+    top: '45%', // Adjust based on your image height preference
+  },
+  rightArrow: {
+    right: 5,
+    top: '45%',
+  },
 });
