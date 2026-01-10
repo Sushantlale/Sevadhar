@@ -6,116 +6,113 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
+  StatusBar,
+  Dimensions
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
 
 export default function LandingScreen() {
   const router = useRouter();
   const [language, setLanguage] = useState('en');
 
-  const t = (key: string) => {
-    const keys: any = {
-      tagline: 'Your Service Partner',
-      connectServe: 'Connect with local providers\nServe your community',
-      signUpAsSevadhar: 'Sign Up as Sevadhar',
-      signUpAsCustomer: 'Sign Up as Customer',
-      haveAccount: 'Already have an account?',
-      signIn: 'Sign In',
-      adminLogin: 'Admin Login'
-    };
-    return keys[key] || key;
-  };
-
   return (
     <SafeAreaView style={styles.container}>
-
-      {/* Language Selector */}
-      <View style={styles.langRow}>
-        {[
-          { code: 'en', label: 'EN' },
-          { code: 'mr', label: 'मराठी' },
-          { code: 'hi', label: 'हिंदी' }
-        ].map(lang => (
-          <TouchableOpacity
-            key={lang.code}
-            style={[
-              styles.langBtn,
-              language === lang.code && styles.langBtnActive
-            ]}
-            onPress={() => setLanguage(lang.code)}
-            activeOpacity={0.8}
-          >
-            <Text
+      <StatusBar barStyle="dark-content" backgroundColor="#FAF9F6" />
+      
+      {/* Top Header - Overlap Fix */}
+      <View style={styles.header}>
+        <View style={styles.langContainer}>
+          {[
+            { code: 'en', label: 'EN' },
+            { code: 'mr', label: 'मराठी' },
+            { code: 'hi', label: 'हिंदी' }
+          ].map(lang => (
+            <TouchableOpacity
+              key={lang.code}
               style={[
-                styles.langText,
-                language === lang.code && styles.langTextActive
+                styles.langBtn,
+                language === lang.code && styles.langBtnActive
               ]}
+              onPress={() => setLanguage(lang.code)}
             >
-              {lang.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.langText,
+                  language === lang.code && styles.langTextActive
+                ]}
+              >
+                {lang.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      {/* Main Content */}
-      <View style={styles.content}>
-        {/* Logo */}
-        <View style={styles.logoCircle}>
-          <Image
-            source={require('../assets/images/logo.png')}
-            style={styles.logo}
-            resizeMode="cover"
-          />
+      <View style={styles.main}>
+        {/* Profile/Logo Section - Floating Icons & Background Fix */}
+        <View style={styles.logoWrapper}>
+          <View style={styles.outerCircle}>
+              <Image
+                source={require('../assets/images/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
+          </View>
         </View>
 
-        {/* Brand */}
-        <Text style={styles.brandTitle}>
-          <Text style={{ color: '#FF7A00' }}>Sevadhar</Text>
-        </Text>
-        <Text style={styles.brandTagline}>{t('tagline')}</Text>
+        {/* Branding */}
+        <View style={styles.textGroup}>
+          <Text style={styles.brandTitle}>Sevadhar</Text>
+          <Text style={styles.brandTagline}>YOUR SERVICE PARTNER</Text>
+          
+          <Text style={styles.description}>
+            Connect with local providers.{"\n"}
+            <Text style={styles.descriptionBold}>Serve your community.</Text>
+          </Text>
+        </View>
 
-        {/* Description */}
-        <Text style={styles.description}>{t('connectServe')}</Text>
-
-        {/* Buttons */}
+        {/* Action Buttons - Paths updated to prevent Unmatched Route error */}
         <View style={styles.buttonGroup}>
           <TouchableOpacity
-            style={[styles.btn, styles.primaryBtn]}
-            onPress={() => router.push('/signup/provider')}
+            style={styles.primaryBtn}
+            onPress={() => router.push('/signup/provider' as any)}
+            activeOpacity={0.9}
           >
-            <Text style={styles.primaryBtnText}>
-              {t('signUpAsSevadhar')}
-            </Text>
+            <Text style={styles.primaryBtnText}>Sign Up as Sevadhar</Text>
+            <MaterialIcons name="chevron-right" size={22} color="#FFF" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.btn, styles.outlineBtn]}
-            onPress={() => router.push('/signup/customer')}
+            style={styles.outlineBtn}
+            onPress={() => router.push('/signup/customer' as any)}
+            activeOpacity={0.7}
           >
-            <Text style={styles.outlineBtnText}>
-              {t('signUpAsCustomer')}
-            </Text>
+            <Text style={styles.outlineBtnText}>Sign Up as Customer</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Footer */}
+      <View style={styles.footer}>
+        <View style={styles.signInRow}>
+          <Text style={styles.footerText}>Already have an account? </Text>
+          <TouchableOpacity onPress={() => router.push('/login' as any)}>
+            <Text style={styles.signInText}>Sign In</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <View style={styles.footerRow}>
-            <Text style={styles.footerText}>{t('haveAccount')} </Text>
-            <TouchableOpacity onPress={() => router.push('/login')}>
-              <Text style={styles.signInLink}>{t('signIn')}</Text>
-            </TouchableOpacity>
-          </View>
+        <TouchableOpacity 
+          style={styles.adminBtn}
+          onPress={() => router.push('/admin/login' as any)}
+        >
+          <MaterialIcons name="account-balance-wallet" size={14} color="#666" style={{ marginRight: 6 }} />
+          <Text style={styles.adminText}>Admin Login</Text>
+        </TouchableOpacity>
 
-          {/* Admin Login */}
-          <TouchableOpacity
-            style={styles.adminLogin}
-            onPress={() => router.push('/admin/login')}
-          >
-            <Text style={styles.adminLoginText}>{t('adminLogin')}</Text>
-          </TouchableOpacity>
-        </View>
-
+        <View style={styles.homeIndicator} />
       </View>
     </SafeAreaView>
   );
@@ -124,138 +121,171 @@ export default function LandingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF9F6'
+    backgroundColor: '#FAF9F6',
   },
-
-  /* Language */
-  langRow: {
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 12,
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    paddingHorizontal: 20,
-    marginTop: 20,          // 👈 moved down for mobile usability
-    marginBottom: 10,
-    gap: 8
+    alignItems: 'center',
+    zIndex: 10,
+    backgroundColor: 'transparent', // Ensure it doesn't block logo
+  },
+  langContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFF',
+    borderRadius: 25,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   langBtn: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,     // 👈 slightly bigger touch area
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#FFF',
-    borderWidth: 1,
-    borderColor: '#EEE'
   },
   langBtnActive: {
-    backgroundColor: '#FF7A00',
-    borderColor: '#FF7A00'
+    backgroundColor: '#FF7F00',
   },
   langText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#666'
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#999',
   },
   langTextActive: {
-    color: '#FFF'
+    color: '#FFF',
   },
-
-  /* Content */
-  content: {
+  main: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 30,
-    paddingTop: 30
+    marginTop: -40, // Pull main content up slightly
   },
-
-  logoCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: '#FFEBDC',
+  logoWrapper: {
+    position: 'relative',
+    marginBottom: 40,
+    marginTop: 20, // Add space from top switcher
+  },
+  outerCircle: {
+    width: width * 0.6,
+    height: width * 0.6,
+    borderRadius: (width * 0.6) / 2,
+    backgroundColor: '#FDF3E7', 
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16
+    overflow: 'hidden',
   },
   logo: {
-    width: 90,
-    height: 90
+    width: '75%',
+    height: '75%',
   },
-
+  textGroup: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
   brandTitle: {
-    fontSize: 40,
-    fontWeight: '700',
-    color: '#333'
-  },
-  atSymbol: {
-    color: '#FF7A00'
+    fontSize: 54,
+    fontWeight: '900',
+    color: '#FF7F00',
+    letterSpacing: -1,
   },
   brandTagline: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-    marginBottom: 20
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+    letterSpacing: 1.2,
+    marginTop: -5,
   },
-
   description: {
     textAlign: 'center',
-    fontSize: 16,
-    color: '#444',
-    lineHeight: 24,
-    marginBottom: 40
+    fontSize: 18,
+    color: '#64748b',
+    marginTop: 25,
+    lineHeight: 26,
   },
-
+  descriptionBold: {
+    fontWeight: '600',
+    color: '#334155',
+  },
   buttonGroup: {
     width: '100%',
-    gap: 16
-  },
-  btn: {
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center'
+    gap: 18,
   },
   primaryBtn: {
-    backgroundColor: '#FF7A00'
+    backgroundColor: '#FF7F00',
+    height: 64,
+    borderRadius: 32,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#FF7F00',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
   },
   primaryBtnText: {
     color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700'
+    fontSize: 18,
+    fontWeight: '800',
+    marginRight: 10,
   },
   outlineBtn: {
+    backgroundColor: 'transparent',
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FF7A00'
+    borderColor: '#FF7F00',
   },
   outlineBtnText: {
-    color: '#FF7A00',
-    fontSize: 16,
-    fontWeight: '700'
+    color: '#FF7F00',
+    fontSize: 18,
+    fontWeight: '800',
   },
-
   footer: {
-    marginTop: 30,
-    alignItems: 'center'
+    paddingBottom: 10,
+    alignItems: 'center',
   },
-  footerRow: {
+  signInRow: {
     flexDirection: 'row',
-    alignItems: 'center'
+    marginBottom: 25,
   },
   footerText: {
-    fontSize: 14,
-    color: '#666'
+    color: '#64748b',
+    fontSize: 15,
   },
-  signInLink: {
-    fontSize: 14,
+  signInText: {
+    color: '#FF7F00',
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  adminBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  adminText: {
+    color: '#64748b',
+    fontSize: 13,
     fontWeight: '700',
-    color: '#FF7A00',
-    textDecorationLine: 'underline'
   },
-
-  adminLogin: {
-    marginTop: 12
-  },
-  adminLoginText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    textDecorationLine: 'underline'
+  homeIndicator: {
+    width: 120,
+    height: 4,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 10,
+    marginTop: 25,
   }
 });

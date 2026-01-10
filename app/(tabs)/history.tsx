@@ -17,7 +17,6 @@ import {
   Search, 
   Star, 
   Heart, 
-  Bell, 
   Calendar, 
   Clock, 
   ChevronRight
@@ -25,7 +24,6 @@ import {
 
 const { width } = Dimensions.get('window');
 
-// Mock Data
 const initialHistory = [
   { 
     id: '1', 
@@ -34,7 +32,6 @@ const initialHistory = [
     rating: 4.5, 
     date: '22 Dec', 
     time: '03:20 PM', 
-    // FIX: Replaced absolute Windows path with a URL or local require
     image: 'https://randomuser.me/api/portraits/men/21.jpg',
     status: 'completed',
     isFavorite: false,
@@ -97,31 +94,25 @@ export default function HistoryPage() {
   );
 
   return (
-    <ImageBackground 
-      // FIX: Standard assets path based on your image_591227.png structure
-      source={require('../../assets/images/history_bg.png')} 
-      style={styles.container}
-      resizeMode="cover"
-    >
+    <View style={styles.outerContainer}>
       <StatusBar barStyle="dark-content" />
       
-      <View style={styles.headerWrapper}>
-        <SafeAreaView style={styles.headerContent}>
-          <View style={styles.headerTop}>
-            <View>
-              <Text style={styles.headerTitle}>History</Text>
-              <Text style={styles.headerSubtitle}>Your past interactions</Text>
-            </View>
-            <TouchableOpacity style={styles.notificationBtn}>
-              <Bell size={20} color="#111827" />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
+      {/* 1. Improved Background Header: Added background color and adjusted resizeMode */}
+      <View style={styles.headerImageContainer}>
+        <ImageBackground 
+            source={require('../../assets/images/History.png')} 
+            style={styles.backgroundImage}
+            resizeMode="contain" // Zooms out to fit the full image
+        >
+            <SafeAreaView style={styles.headerSpacer} />
+        </ImageBackground>
       </View>
 
       <View style={styles.contentArea}>
         <View style={styles.dragIndicator} />
         
+
+        {/* Search container with improved padding */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
             <Search size={18} color="#9CA3AF" />
@@ -151,7 +142,6 @@ export default function HistoryPage() {
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
           {filteredHistory.map((item, index) => {
-             // Corrected logic to ensure multiple names are displayed
              const showMonth = index === 0 || item.month !== filteredHistory[index - 1].month;
              return (
                <View key={item.id}>
@@ -210,59 +200,102 @@ export default function HistoryPage() {
           })}
         </ScrollView>
       </View>
-    </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  outerContainer: { flex: 1, backgroundColor: '#ffffff' },
   flex1: { flex: 1 },
-  headerWrapper: { height: 160, width: '100%' },
-  headerContent: { flex: 1, paddingHorizontal: 24 },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: 20 },
-  headerTitle: { fontSize: 32, fontWeight: 'bold', color: '#111827', letterSpacing: -0.5 },
-  headerSubtitle: { fontSize: 14, color: '#4B5563', fontWeight: '500', marginTop: 4 },
-  notificationBtn: { backgroundColor: 'rgba(0,0,0,0.05)', padding: 10, borderRadius: 20 },
+  // Container to hold the cream-orange background color to match the image
+  headerImageContainer: {
+    height: 250,
+    width: '100%',
+    backgroundColor: '#FFF3E6', 
+  },
+  backgroundImage: {
+    flex: 1,
+    width: '100%',
+  },
+  headerSpacer: { height: '100%' },
   contentArea: { 
     flex: 1, 
-    marginTop: -20, 
-    backgroundColor: 'rgba(249, 250, 251, 0.95)',
-    borderTopLeftRadius: 32, 
-    borderTopRightRadius: 32,
+    marginTop: -45, // Reduced overlap so the zoomed-out image stays visible
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 40, 
+    borderTopRightRadius: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 15,
+    elevation: 10,
   },
-  dragIndicator: { width: 48, height: 6, backgroundColor: '#D1D5DB', borderRadius: 3, alignSelf: 'center', marginTop: 12 },
-  searchContainer: { paddingHorizontal: 20, paddingTop: 20 },
-  searchBar: { flexDirection: 'row', alignItems: 'center', height: 56, borderRadius: 16, backgroundColor: 'white', paddingHorizontal: 16, elevation: 4 },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 15, color: '#111827' },
-  tabsWrapper: { marginTop: 20 },
-  tabsScroll: { paddingHorizontal: 20 },
-  rangeTab: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 25, backgroundColor: 'white', elevation: 2, marginRight: 12 },
+  dragIndicator: { width: 44, height: 5, backgroundColor: '#E2E8F0', borderRadius: 3, alignSelf: 'center', marginTop: 14 },
+  
+  textHeadingSection: {
+    paddingHorizontal: 24, 
+    paddingTop: 10,
+  },
+  headerTitleText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#3B1E14', 
+    letterSpacing: -0.8,
+  },
+  headerSubtitleText: {
+    fontSize: 16,
+    color: '#6B7280',
+    fontWeight: '500',
+    marginTop: 2,
+  },
+
+  searchContainer: { 
+    paddingHorizontal: 24, 
+    paddingTop: 15, 
+    paddingBottom: 10 
+  },
+  searchBar: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    height: 56, 
+    borderRadius: 18, 
+    backgroundColor: '#F8FAFC', 
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#F1F5F9'
+  },
+  searchInput: { flex: 1, marginLeft: 10, fontSize: 16, color: '#1E293B' },
+  
+  tabsWrapper: { marginTop: 10 },
+  tabsScroll: { paddingHorizontal: 24 },
+  rangeTab: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 25, backgroundColor: '#F8FAFC', marginRight: 12 },
   activeRangeTab: { backgroundColor: '#F97316' },
-  rangeText: { fontSize: 14, fontWeight: '700', color: '#4B5563' },
+  rangeText: { fontSize: 14, fontWeight: '700', color: '#64748B' },
   activeRangeText: { color: 'white' },
-  listContainer: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 120 },
-  monthHeader: { fontSize: 12, fontWeight: 'bold', color: '#6B7280', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1 },
-  card: { backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 3 },
+  
+  listContainer: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 130 },
+  monthHeader: { fontSize: 11, fontWeight: '800', color: '#94A3B8', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1.5 },
+  card: { backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 4, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 15, borderWidth: 1, borderColor: '#F1F5F9' },
   cardMain: { flexDirection: 'row', gap: 16 },
   avatarWrapper: { position: 'relative' },
-  avatar: { width: 72, height: 72, borderRadius: 16, backgroundColor: '#F3F4F6' },
+  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#F1F5F9' }, 
   grayscale: { opacity: 0.6 },
-  onlineDot: { position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: 'white' },
+  onlineDot: { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: 'white' },
   cardDetails: { flex: 1, justifyContent: 'center' },
   nameRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  workerName: { fontSize: 17, fontWeight: 'bold', color: '#111827' },
-  serviceName: { fontSize: 14, color: '#F97316', fontWeight: '600' },
-  textGray: { color: '#6B7280' },
-  ratingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FEF3C7', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  ratingText: { fontSize: 12, fontWeight: 'bold', color: '#92400E' },
+  workerName: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
+  serviceName: { fontSize: 14, color: '#F97316', fontWeight: '700', marginTop: 2 },
+  textGray: { color: '#94A3B8' },
+  ratingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FEF9C3', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  ratingText: { fontSize: 12, fontWeight: 'bold', color: '#A16207' },
   metaRow: { flexDirection: 'row', gap: 12, marginTop: 10 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F9FAFB', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  metaText: { fontSize: 12, fontWeight: '600', color: '#6B7280' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F8FAFC', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
+  metaText: { fontSize: 12, fontWeight: '600', color: '#64748B' },
   favBtn: { paddingTop: 4 },
-  cardFooter: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F3F4F6', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cancelledBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FEF2F2', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
+  cardFooter: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cancelledBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FEF2F2', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
   cancelledDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#EF4444' },
-  cancelledText: { fontSize: 12, fontWeight: 'bold', color: '#B91C1C' },
+  cancelledText: { fontSize: 11, fontWeight: '800', color: '#B91C1C' },
   actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   actionBtnText: { fontSize: 14, fontWeight: 'bold', color: '#F97316' },
 });
