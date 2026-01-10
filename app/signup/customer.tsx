@@ -2,16 +2,18 @@ import Checkbox from 'expo-checkbox';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import {
-  ArrowLeft,
-  CheckCircle,
-  Eye, EyeOff,
-  Lock,
-  Mail,
+  ChevronLeft,
+  User,
   MapPin,
-  Navigation,
+  Home,
   Phone,
-  Ticket, // Added Ticket icon for Referral
-  User
+  Smartphone,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  Ticket,
+  Navigation
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -23,8 +25,11 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Text, TextInput, TouchableOpacity,
-  View
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  StatusBar
 } from 'react-native';
 
 const localities = [
@@ -38,8 +43,6 @@ export default function CustomerSignup() {
   const [modalVisible, setModalVisible] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
-  
-  const [toast, setToast] = useState<{ msg: string; title: string } | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -49,18 +52,13 @@ export default function CustomerSignup() {
     email: '',
     otp: '',
     password: '',
-    referralCode: '', // Added referralCode state
+    referralCode: '',
     agreeTerms: false,
   });
 
-  const showErrorMessage = (title: string, msg: string) => {
-    setToast({ title, msg });
-    setTimeout(() => setToast(null), 4000);
-  };
-
   const handleSendOTP = () => {
     if (!formData.phone || formData.phone.length !== 10) {
-      showErrorMessage("Invalid Phone Number", "Please enter a valid 10-digit phone number");
+      Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
       return;
     }
     setOtpSent(true);
@@ -70,9 +68,9 @@ export default function CustomerSignup() {
   const handleVerifyOTP = () => {
     if (formData.otp.length === 6) {
       setOtpVerified(true);
-      Alert.alert("Success", "Phone number verified successfully!");
+      Alert.alert("Success", "Phone number verified!");
     } else {
-      showErrorMessage("Invalid OTP", "Please enter the correct 6-digit verification code");
+      Alert.alert("Invalid OTP", "Please enter the correct 6-digit code");
     }
   };
 
@@ -82,198 +80,243 @@ export default function CustomerSignup() {
       Alert.alert("Permission Denied", "Allow location access in settings");
       return;
     }
-    setFormData({ ...formData, area: "Current Location (Fetching...)" });
+    setFormData({ ...formData, area: "Fetching location..." });
     setModalVisible(false);
-    setTimeout(() => setFormData(prev => ({...prev, area: "Khopoli Area (GPS)"})), 1500);
+    setTimeout(() => setFormData(prev => ({ ...prev, area: "Khopoli, Maharashtra" })), 1500);
+  };
+
+  // Helper for email validation
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
   };
 
   const handleSubmit = () => {
+    // 1. Mandatory Fields Check
     if (!formData.fullName || !formData.area || !formData.phone || !formData.password || !formData.address) {
-      showErrorMessage("Field Required", "Please fill all mandatory fields marked with *");
+      Alert.alert("Missing Fields", "Please fill all mandatory fields (*)");
       return;
     }
+
+    // 2. Password Length Validation (Min 8 Digits/Characters)
+    if (formData.password.length < 8) {
+      Alert.alert("Invalid Password", "Password must be at least 8 characters long.");
+      return;
+    }
+
+    // 3. Email Validation (If provided)
+    if (formData.email && !isValidEmail(formData.email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    // 4. OTP Verification Check
     if (!otpVerified) {
-      showErrorMessage("Verify OTP First", "Please verify your phone number to continue");
+      Alert.alert("Verify OTP", "Please verify your phone number first");
       return;
     }
+
+    // 5. Terms Agreement Check
     if (!formData.agreeTerms) {
-      showErrorMessage("Terms Required", "Please agree to the Terms and Conditions");
+      Alert.alert("Terms", "You must agree to the Terms and Conditions");
       return;
     }
-    // Handle form submission logic here
-    router.push('/(tabs)/home' as any);
+
+    // Logic for successful registration
+    Alert.alert("Success", "Account created successfully!");
+    router.push('/home');
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        {toast && (
-          <View style={styles.errorToast}>
-            <Text style={styles.errorToastTitle}>{toast.title}</Text>
-            <Text style={styles.errorToastMsg}>{toast.msg}</Text>
-          </View>
-        )}
-
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-            <ArrowLeft size={24} color="#333" />
-          </TouchableOpacity>
-          <View>
-            <Text style={styles.headerTitle}>Customer Sign Up</Text>
-            <Text style={styles.headerSub}>Create your customer account</Text>
-          </View>
-        </View>
-
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           
-          <Text style={styles.label}>Full Name <Text style={styles.red}>*</Text></Text>
-          <View style={styles.inputContainer}>
-            <User size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="Full Name" 
-              style={styles.input} 
-              onChangeText={(v) => setFormData({...formData, fullName: v})}
-            />
-          </View>
-
-          <Text style={styles.label}>Area/Locality <Text style={styles.red}>*</Text></Text>
-          <TouchableOpacity style={styles.inputContainer} onPress={() => setModalVisible(true)}>
-            <MapPin size={20} color="#999" style={styles.icon} />
-            <Text style={{ color: formData.area ? '#000' : '#999', flex: 1 }}>
-              {formData.area || "Select your area"}
-            </Text>
+          {/* Header */}
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <ChevronLeft size={28} color="#334155" />
           </TouchableOpacity>
 
-          <Text style={styles.label}>Home Address <Text style={styles.red}>*</Text></Text>
-          <View style={[styles.inputContainer, { height: 80, alignItems: 'flex-start', paddingTop: 12 }]}>
-            <MapPin size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="Home Address" 
-              style={styles.input} 
-              multiline 
-              onChangeText={(v) => setFormData({...formData, address: v})}
-            />
-          </View>
+          <Text style={styles.title}>Create Account</Text>
+          <Text style={styles.subtitle}>Join us to find the best local services.</Text>
 
-          <Text style={styles.label}>Phone Number <Text style={styles.red}>*</Text></Text>
-          <View style={styles.inputContainer}>
-            <Phone size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="10-digit Mobile Number" 
-              style={styles.input} 
-              keyboardType="phone-pad"
-              maxLength={10}
-              onChangeText={(v) => setFormData({...formData, phone: v.replace(/[^0-9]/g, '')})}
-            />
-          </View>
-
-          <View style={styles.otpRow}>
-            <TouchableOpacity 
-              style={[styles.sendOtpBtn, otpSent && { backgroundColor: '#CCC' }]} 
-              onPress={handleSendOTP}
-              disabled={otpSent}
-            >
-              <Text style={styles.sendOtpText}>{otpSent ? "Sent" : "Send OTP"}</Text>
-            </TouchableOpacity>
-            
-            <View style={[styles.inputContainer, { flex: 1, marginBottom: 0 }]}>
-              <TextInput 
-                placeholder="Enter 6-digit OTP" 
-                style={styles.input} 
-                keyboardType="number-pad" 
-                maxLength={6}
-                onChangeText={(v) => setFormData({...formData, otp: v})}
+          {/* Full Name */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Full Name <Text style={styles.asterisk}>*</Text></Text>
+            <View style={styles.inputWrapper}>
+              <User size={20} color="#94a3b8" style={styles.inputIcon} />
+              <TextInput
+                placeholder="Enter your full name"
+                placeholderTextColor="#94a3b8"
+                style={styles.input}
+                onChangeText={(v) => setFormData({ ...formData, fullName: v })}
               />
-              {otpSent && !otpVerified && (
-                <TouchableOpacity onPress={handleVerifyOTP}>
-                  <Text style={styles.verifyTextLink}>Verify</Text>
-                </TouchableOpacity>
-              )}
-              {otpVerified && <CheckCircle size={20} color="#10B981" />}
             </View>
           </View>
 
-          <Text style={styles.label}>Email Address (Optional)</Text>
-          <View style={styles.inputContainer}>
-            <Mail size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="Email Address" 
-              style={styles.input} 
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onChangeText={(v) => setFormData({...formData, email: v})}
-            />
-          </View>
-
-          <Text style={styles.label}>Password <Text style={styles.red}>*</Text></Text>
-          <View style={styles.inputContainer}>
-            <Lock size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="Create Password" 
-              style={styles.input} 
-              secureTextEntry={!showPassword}
-              onChangeText={(v) => setFormData({...formData, password: v})}
-            />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              {showPassword ? <EyeOff size={20} color="#999" /> : <Eye size={20} color="#999" />}
+          {/* Area/Locality */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Area/Locality <Text style={styles.asterisk}>*</Text></Text>
+            <TouchableOpacity style={styles.inputWrapper} onPress={() => setModalVisible(true)}>
+              <MapPin size={20} color="#94a3b8" style={styles.inputIcon} />
+              <Text style={[styles.inputText, !formData.area && { color: '#94a3b8' }]}>
+                {formData.area || "Select your area"}
+              </Text>
             </TouchableOpacity>
           </View>
 
-          {/* Referral Code Section (Added) */}
-          <Text style={styles.label}>Referral Code (Optional)</Text>
-          <View style={styles.inputContainer}>
-            <Ticket size={20} color="#999" style={styles.icon} />
-            <TextInput 
-              placeholder="Enter Referral Code" 
-              style={styles.input} 
-              autoCapitalize="characters"
-              onChangeText={(v) => setFormData({...formData, referralCode: v})}
+          {/* Home Address */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Home Address <Text style={styles.asterisk}>*</Text></Text>
+            <View style={[styles.inputWrapper, styles.textAreaWrapper]}>
+              <Home size={20} color="#94a3b8" style={[styles.inputIcon, { marginTop: 14 }]} />
+              <TextInput
+                placeholder="Flat, Building, Street name"
+                placeholderTextColor="#94a3b8"
+                style={[styles.input, styles.textArea]}
+                multiline
+                numberOfLines={3}
+                onChangeText={(v) => setFormData({ ...formData, address: v })}
+              />
+            </View>
+          </View>
+
+          {/* Phone Number & OTP */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Phone Number <Text style={styles.asterisk}>*</Text></Text>
+            <View style={styles.phoneRow}>
+              <View style={[styles.inputWrapper, { flex: 1, marginBottom: 0 }]}>
+                <Phone size={20} color="#94a3b8" style={styles.inputIcon} />
+                <TextInput
+                  placeholder="10-digit mobile number"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  style={styles.input}
+                  onChangeText={(v) => setFormData({ ...formData, phone: v.replace(/[^0-9]/g, '') })}
+                />
+              </View>
+              <TouchableOpacity style={styles.otpButton} onPress={handleSendOTP}>
+                <Text style={styles.otpButtonText}>Send OTP</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* OTP Field */}
+          <View style={[styles.inputWrapper, { marginTop: 12 }]}>
+            <Smartphone size={20} color="#94a3b8" style={styles.inputIcon} />
+            <TextInput
+              placeholder="Enter 6-digit OTP"
+              placeholderTextColor="#94a3b8"
+              keyboardType="number-pad"
+              maxLength={6}
+              style={styles.input}
+              onChangeText={(v) => setFormData({ ...formData, otp: v })}
+              onBlur={handleVerifyOTP}
             />
           </View>
 
-          <View style={styles.termsContainer}>
+          {/* Email */}
+          <View style={[styles.inputGroup, { marginTop: 24 }]}>
+            <Text style={styles.label}>Email Address <Text style={styles.optional}>(Optional)</Text></Text>
+            <View style={styles.inputWrapper}>
+              <Mail size={20} color="#94a3b8" style={styles.inputIcon} />
+              <TextInput
+                placeholder="email@example.com"
+                placeholderTextColor="#94a3b8"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+                onChangeText={(v) => setFormData({ ...formData, email: v })}
+              />
+            </View>
+          </View>
+
+          {/* Password */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password <Text style={styles.asterisk}>*</Text></Text>
+            <View style={styles.inputWrapper}>
+              <Lock size={20} color="#94a3b8" style={styles.inputIcon} />
+              <TextInput
+                placeholder="Create a strong password (min. 8 digits)"
+                placeholderTextColor="#94a3b8"
+                secureTextEntry={!showPassword}
+                style={styles.input}
+                onChangeText={(v) => setFormData({ ...formData, password: v })}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff size={20} color="#94a3b8" /> : <Eye size={20} color="#94a3b8" />}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Referral */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Referral Code <Text style={styles.optional}>(Optional)</Text></Text>
+            <View style={styles.inputWrapper}>
+              <Ticket size={20} color="#94a3b8" style={styles.inputIcon} />
+              <TextInput
+                placeholder="Enter referral code"
+                placeholderTextColor="#94a3b8"
+                autoCapitalize="characters"
+                style={styles.input}
+                onChangeText={(v) => setFormData({ ...formData, referralCode: v })}
+              />
+            </View>
+          </View>
+
+          {/* Terms */}
+          <View style={styles.termsRow}>
             <Checkbox
               value={formData.agreeTerms}
-              onValueChange={(val) => setFormData({...formData, agreeTerms: val})}
-              color={formData.agreeTerms ? '#FF7A00' : undefined}
+              onValueChange={(val) => setFormData({ ...formData, agreeTerms: val })}
+              color={formData.agreeTerms ? '#FF7A00' : '#e2e8f0'}
+              style={styles.checkbox}
             />
             <Text style={styles.termsText}>
-              I agree with the <Text style={styles.orange}>Terms and Conditions</Text> and <Text style={styles.orange}>Privacy Policy *</Text>
+              I agree with the <Text style={styles.link}>Terms and Conditions</Text> and <Text style={styles.link}>Privacy Policy</Text> <Text style={styles.asterisk}>*</Text>
             </Text>
           </View>
 
+          {/* Submit Button */}
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
             <Text style={styles.submitBtnText}>Create Account</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.loginContainer}>
+            <Text style={styles.loginText}>
+              Already have an account? <Text style={styles.loginLink}>Log In</Text>
+            </Text>
+          </TouchableOpacity>
+
           <View style={{ height: 40 }} />
         </ScrollView>
       </KeyboardAvoidingView>
 
+      {/* Area Modal */}
       <Modal visible={modalVisible} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalHeader}>Select Area</Text>
-            <TouchableOpacity style={styles.gpsOption} onPress={requestLocation}>
-              <Navigation size={22} color="#FF7A00" />
-              <Text style={styles.gpsText}>Use Current Location</Text>
+            <Text style={styles.modalTitle}>Select Area</Text>
+            <TouchableOpacity style={styles.gpsButton} onPress={requestLocation}>
+              <Navigation size={20} color="#FF7A00" />
+              <Text style={styles.gpsButtonText}>Use Current Location</Text>
             </TouchableOpacity>
-            <FlatList 
+            <FlatList
               data={localities}
               keyExtractor={(item) => item.id}
               renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.areaItem} 
-                  onPress={() => { setFormData({...formData, area: item.city}); setModalVisible(false); }}
+                <TouchableOpacity
+                  style={styles.areaOption}
+                  onPress={() => { setFormData({ ...formData, area: item.city }); setModalVisible(false); }}
                 >
-                  <Text style={styles.areaItemText}>{item.city}</Text>
+                  <Text style={styles.areaOptionText}>{item.city}</Text>
                 </TouchableOpacity>
               )}
             />
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeModal}>
-              <Text style={styles.closeModalText}>Cancel</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.modalClose}>
+              <Text style={styles.modalCloseText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -283,36 +326,80 @@ export default function CustomerSignup() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#FAF9F6' },
-  errorToast: { position: 'absolute', top: 50, left: 20, right: 20, backgroundColor: '#EF4444', padding: 15, borderRadius: 12, zIndex: 999, elevation: 10 },
-  errorToastTitle: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
-  errorToastMsg: { color: '#FFF', fontSize: 13, marginTop: 2 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 20, backgroundColor: '#FFF' },
-  backBtn: { marginRight: 15 },
-  headerTitle: { fontSize: 22, fontWeight: 'bold', color: '#333' },
-  headerSub: { fontSize: 12, color: '#888' },
-  scroll: { padding: 25 },
-  label: { fontSize: 14, fontWeight: '700', color: '#444', marginBottom: 8 },
-  red: { color: 'red' },
-  inputContainer: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderWidth: 1, borderColor: '#EEE', borderRadius: 12, paddingHorizontal: 15, height: 56, marginBottom: 22 },
-  icon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 15 },
-  otpRow: { flexDirection: 'row', gap: 12, marginBottom: 22, height: 56, alignItems: 'center' },
-  sendOtpBtn: { backgroundColor: '#FF7A00', height: '100%', paddingHorizontal: 20, borderRadius: 12, justifyContent: 'center' },
-  sendOtpText: { color: '#FFF', fontWeight: 'bold', fontSize: 14 },
-  verifyTextLink: { color: '#FF7A00', fontWeight: 'bold', fontSize: 14, marginLeft: 10 },
-  termsContainer: { flexDirection: 'row', alignItems: 'center', marginBottom: 30, paddingRight: 20 },
-  termsText: { fontSize: 12, color: '#666', marginLeft: 10 },
-  orange: { color: '#FF7A00', fontWeight: '600' },
-  submitBtn: { backgroundColor: '#FF7A00', height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center', elevation: 3 },
-  submitBtnText: { color: '#FFF', fontSize: 18, fontWeight: 'bold' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 25, height: '60%' },
-  modalHeader: { fontSize: 20, fontWeight: 'bold', marginBottom: 20 },
-  gpsOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  gpsText: { fontSize: 16, color: '#FF7A00', fontWeight: 'bold', marginLeft: 12 },
-  areaItem: { paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#F0F0F0' },
-  areaItemText: { fontSize: 15, color: '#333' },
-  closeModal: { marginTop: 10, padding: 15, alignItems: 'center' },
-  closeModalText: { color: '#999', fontSize: 16 }
+  container: { flex: 1, backgroundColor: '#FAF9F6' },
+  scrollContent: { paddingHorizontal: 24, paddingTop: 20 },
+  backButton: { width: 40, height: 40, justifyContent: 'center', marginLeft: -10, marginBottom: 20 },
+  title: { fontSize: 32, fontWeight: '700', color: '#0f172a', letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: '#64748b', marginTop: 4, marginBottom: 32 },
+  
+  inputGroup: { marginBottom: 16 },
+  label: { fontSize: 14, fontWeight: '600', color: '#334155', marginBottom: 8 },
+  asterisk: { color: '#FF7A00' },
+  optional: { color: '#94a3b8', fontWeight: '400' },
+  
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#f1f5f9',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 58,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  inputIcon: { marginRight: 12 },
+  input: { flex: 1, fontSize: 16, color: '#1e293b' },
+  inputText: { fontSize: 16, color: '#1e293b' },
+  
+  textAreaWrapper: { height: 110, alignItems: 'flex-start' },
+  textArea: { height: '100%', paddingTop: 16, textAlignVertical: 'top' },
+  
+  phoneRow: { flexDirection: 'row', gap: 12 },
+  otpButton: { 
+    backgroundColor: '#FF7A00', 
+    borderRadius: 16, 
+    justifyContent: 'center', 
+    paddingHorizontal: 18,
+    height: 58 
+  },
+  otpButtonText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
+
+  termsRow: { flexDirection: 'row', alignItems: 'flex-start', marginTop: 20, paddingRight: 10 },
+  checkbox: { width: 20, height: 20, borderRadius: 6, marginTop: 2 },
+  termsText: { flex: 1, marginLeft: 12, fontSize: 14, color: '#64748b', lineHeight: 20 },
+  link: { color: '#FF7A00', fontWeight: '700' },
+
+  submitBtn: { 
+    backgroundColor: '#FF7A00', 
+    height: 60, 
+    borderRadius: 18, 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginTop: 32,
+    shadowColor: "#FF7A00",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  submitBtnText: { color: '#FFF', fontSize: 18, fontWeight: '700' },
+  
+  loginContainer: { marginTop: 24, alignItems: 'center' },
+  loginText: { fontSize: 15, color: '#64748b' },
+  loginLink: { color: '#FF7A00', fontWeight: '700' },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: '#FFF', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, minHeight: '50%' },
+  modalTitle: { fontSize: 20, fontWeight: '700', marginBottom: 20, color: '#0f172a' },
+  gpsButton: { flexDirection: 'row', alignItems: 'center', padding: 16, backgroundColor: '#fff7ed', borderRadius: 12, marginBottom: 12 },
+  gpsButtonText: { marginLeft: 10, color: '#FF7A00', fontWeight: '700', fontSize: 16 },
+  areaOption: { paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+  areaOptionText: { fontSize: 16, color: '#334155' },
+  modalClose: { marginTop: 20, alignItems: 'center', padding: 10 },
+  modalCloseText: { color: '#94a3b8', fontSize: 16, fontWeight: '600' }
 });

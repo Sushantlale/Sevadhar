@@ -1,50 +1,51 @@
-import * as ImagePicker from 'expo-image-picker';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import {
-  Bell,
-  CheckCircle2,
-  ChevronRight,
-  Copy,
-  Droplets,
-  Edit3,
-  Facebook,
-  FlameKindling,
-  HelpCircle,
-  IndianRupee,
-  Instagram,
-  Linkedin,
-  LogOut,
-  Mail,
-  MapPin,
-  Mic,
-  Phone,
-  Play,
-  Plus,
-  Save,
-  Snowflake,
-  Star,
-  Trash2,
-  Twitter,
-  Wallet,
-  Wrench,
-  X,
-  Youtube
-} from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  Alert,
-  Dimensions,
-  Image,
-  SafeAreaView,
-  ScrollView,
   StyleSheet,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
   View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  Dimensions,
+  Switch,
+  Alert,
+  TextInput,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import {
+  Edit3,
+  Star,
+  CheckCircle2,
+  Bell,
+  Wallet,
+  IndianRupee,
+  Play,
+  Trash2,
+  Mic,
+  Plus,
+  Share2,
+  Copy,
+  Phone,
+  Mail,
+  MapPin,
+  ChevronRight,
+  LogOut,
+  HelpCircle,
+  Facebook,
+  Youtube,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Save,
+  X,
+  Snowflake,
+  Wrench,
+  FlameKindling,
+  Droplets
+} from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -56,19 +57,16 @@ export default function ProfilePage() {
   const [dailyCheck, setDailyCheck] = useState(true);
   const [avatar, setAvatar] = useState('https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400');
   
-  // 1. Work Gallery State
   const [gallery, setGallery] = useState([
     'https://picsum.photos/200/200?sig=1',
     'https://picsum.photos/200/200?sig=2',
     'https://picsum.photos/200/200?sig=3'
   ]);
 
-  // 2. My Seva State
   const [sevas, setSevas] = useState(['AC Repair', 'Installation', 'Gas Filling', 'Cleaning']);
   const [newSeva, setNewSeva] = useState('');
   const [isAddingSeva, setIsAddingSeva] = useState(false);
 
-  // 3. Contact Info State
   const [isEditingContact, setIsEditingContact] = useState(false);
   const [contactInfo, setContactInfo] = useState({
     phone: '+91 98765 43210',
@@ -76,7 +74,6 @@ export default function ProfilePage() {
     location: 'Mumbai, Maharashtra'
   });
 
-  // 4. Social Media State
   const [isEditingSocial, setIsEditingSocial] = useState(false);
   const [socialLinks, setSocialLinks] = useState({
     facebook: '',
@@ -86,8 +83,8 @@ export default function ProfilePage() {
     twitter: ''
   });
 
-  // --- Voice Recorder Requirements ---
-  const [voiceUri, setVoiceUri] = useState<string | null>('dummy-uri'); // Initial existing recording
+  // --- Voice Recorder states ---
+  const [voiceUri, setVoiceUri] = useState<string | null>('dummy-uri'); 
   const [isRecording, setIsRecording] = useState(false);
 
   const handleDeleteVoice = () => {
@@ -98,9 +95,8 @@ export default function ProfilePage() {
   };
 
   const handleStartRecording = () => {
-    // Exact behavior as Home Page recorder
     setIsRecording(true);
-    // Simulate recording end after 3 seconds for UI demonstration
+    // Simulate recording logic behavior from Home Page
     setTimeout(() => {
         setIsRecording(false);
         setVoiceUri('new-recording-uri');
@@ -162,7 +158,7 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Profile Section */}
+        {/* Profile Info */}
         <View style={styles.profileSection}>
           <View style={styles.avatarContainer}>
             <Image source={{ uri: avatar }} style={styles.avatar} />
@@ -170,13 +166,11 @@ export default function ProfilePage() {
               <Plus size={16} color="white" />
             </TouchableOpacity>
           </View>
-          
           <View style={styles.nameRow}>
             <Text style={styles.userName}>Rajesh Kumar</Text>
             <CheckCircle2 size={20} color="#3b82f6" fill="#3b82f6" fillOpacity={0.1} />
           </View>
           <Text style={styles.userRole}>Certified AC Technician</Text>
-          
           <View style={styles.ratingBadge}>
             <Star size={14} color="#f97316" fill="#f97316" />
             <Text style={styles.ratingText}>4.8</Text>
@@ -242,7 +236,6 @@ export default function ProfilePage() {
         </View>
 
         {voiceUri ? (
-          // UI when recording exists
           <>
             <View style={styles.audioContainer}>
               <TouchableOpacity style={styles.audioPlayBtn}>
@@ -262,11 +255,10 @@ export default function ProfilePage() {
             </View>
             <View style={styles.voiceFooter}>
                <Mic size={14} color="#10b981" />
-               <Text style={styles.micText}>Voice message stored</Text>
+               <Text style={styles.micText}>Hold to record</Text>
             </View>
           </>
         ) : (
-          // UI when recording is deleted
           <View style={styles.addVoiceContainer}>
              <TouchableOpacity style={styles.addVoiceBtn} onPress={handleStartRecording}>
                 <Plus size={30} color="#ea580c" />
@@ -287,7 +279,7 @@ export default function ProfilePage() {
             <View style={styles.addSevaInputRow}>
                 <TextInput 
                     style={styles.sevaTextInput}
-                    placeholder="Enter seva name..."
+                    placeholder="Enter seva detail..."
                     value={newSeva}
                     onChangeText={(text: string) => setNewSeva(text)}
                 />
@@ -317,6 +309,18 @@ export default function ProfilePage() {
           ))}
         </ScrollView>
 
+        {/* Referral Section (Updated Position) */}
+        <View style={styles.referralCard}>
+          <View>
+            <Text style={styles.cardLabel}>Referral Code</Text>
+            <Text style={styles.referralCode}>SEVA450</Text>
+            <Text style={styles.cardSub}>Share and earn SevaCoins</Text>
+          </View>
+          <TouchableOpacity style={styles.shareButton}>
+            <Share2 size={18} color="#ea580c" />
+          </TouchableOpacity>
+        </View>
+
         {/* Work Gallery Section */}
         <View style={[styles.sectionHeader, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Work Gallery</Text>
@@ -338,7 +342,7 @@ export default function ProfilePage() {
           ))}
         </ScrollView>
 
-        {/* Contact Info Section */}
+        {/* Contact Information */}
         <View style={[styles.sectionHeader, { marginTop: 20, marginBottom: 10 }]}>
             <Text style={styles.sectionTitle}>Contact Information</Text>
             <TouchableOpacity onPress={() => setIsEditingContact(!isEditingContact)}>
@@ -369,7 +373,7 @@ export default function ProfilePage() {
           />
         </View>
 
-        {/* Social Media Links Section */}
+        {/* Social Media Links */}
         <View style={[styles.sectionHeader, { marginTop: 25 }]}>
             <Text style={styles.sectionTitle}>Social Media Links</Text>
             <TouchableOpacity onPress={() => setIsEditingSocial(!isEditingSocial)}>
@@ -386,13 +390,11 @@ export default function ProfilePage() {
                 <SocialInput icon={<Instagram size={20} color="#E4405F" />} value={socialLinks.instagram} onChange={(t: string) => setSocialLinks({...socialLinks, instagram: t})} placeholder="Instagram Link" />
                 <SocialInput icon={<Twitter size={20} color="black" />} value={socialLinks.twitter} onChange={(t: string) => setSocialLinks({...socialLinks, twitter: t})} placeholder="Twitter Link" />
                 <SocialInput icon={<Linkedin size={20} color="#0A66C2" />} value={socialLinks.linkedin} onChange={(t: string) => setSocialLinks({...socialLinks, linkedin: t})} placeholder="LinkedIn Link" />
-                {/* YouTube Icon Fixed Here */}
                 <SocialInput icon={<Youtube size={22} color="#FF0000" fill="#FF0000" />} value={socialLinks.youtube} onChange={(t: string) => setSocialLinks({...socialLinks, youtube: t})} placeholder="YouTube Link" />
             </View>
         ) : (
             <View style={styles.socialRow}>
               <SocialIcon color="#1877F2" icon={<Facebook size={20} color="white" fill="white" />} />
-              {/* YouTube Icon Fixed Here */}
               <SocialIcon color="#FF0000" icon={<Youtube size={20} color="white" fill="white" />} />
               <SocialIcon color="#E4405F" icon={<Instagram size={20} color="white" />} />
               <SocialIcon color="#0A66C2" icon={<Linkedin size={20} color="white" fill="white" />} />
@@ -416,7 +418,7 @@ export default function ProfilePage() {
   );
 }
 
-// --- Internal Helper Components ---
+// --- Helper Components ---
 
 const ContactItem = ({ icon, label, value, isEditing, onChange }: { icon: any, label: string, value: string, isEditing: boolean, onChange: (t: string) => void }) => (
   <View style={styles.contactItem}>
@@ -471,28 +473,41 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 100 },
   flex1: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15, backgroundColor: 'rgba(255,255,255,0.8)' },
+  
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+  },
   headerTitle: { fontSize: 20, fontWeight: '800', color: '#1f2937' },
   iconButton: { padding: 8, borderRadius: 20, backgroundColor: '#fff7ed' },
+
   profileSection: { alignItems: 'center', paddingVertical: 20 },
   avatarContainer: { width: 120, height: 120, borderRadius: 60, padding: 4, backgroundColor: 'white', elevation: 10, shadowColor: '#ea580c', shadowOpacity: 0.2, shadowRadius: 20 },
   avatar: { width: '100%', height: '100%', borderRadius: 60 },
   cameraIcon: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#10b981', padding: 6, borderRadius: 15, borderWidth: 3, borderColor: 'white' },
+  
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 15 },
   userName: { fontSize: 24, fontWeight: '800', color: '#111827' },
   userRole: { fontSize: 14, color: '#6b7280', fontWeight: '500', marginTop: 4 },
+  
   ratingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.7)', paddingHorizontal: 15, paddingVertical: 6, borderRadius: 20, marginTop: 12, borderWidth: 1, borderColor: '#ffedd5' },
   ratingText: { fontWeight: '800', marginLeft: 5, color: '#1f2937' },
   reviewCount: { fontSize: 12, color: '#9ca3af', marginLeft: 4 },
+
   dutyContainer: { flexDirection: 'row', backgroundColor: '#f3f4f6', marginHorizontal: 20, borderRadius: 30, padding: 4, marginTop: 10 },
   dutyBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 25 },
   dutyBtnActive: { backgroundColor: 'white', elevation: 2 },
   dutyText: { fontWeight: '600', color: '#6b7280' },
   dutyTextActive: { color: '#ea580c', fontWeight: '800' },
+
   glassCard: { marginHorizontal: 20, marginTop: 20, padding: 15, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.6)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },
   notificationIconBg: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff7ed', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   cardTitle: { fontWeight: '800', color: '#111827' },
   cardSub: { fontSize: 12, color: '#9ca3af' },
+
   walletCard: { marginHorizontal: 20, marginTop: 20, borderRadius: 25, padding: 20 },
   walletHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
   walletLabel: { color: '#ffedd5', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
@@ -501,9 +516,11 @@ const styles = StyleSheet.create({
   walletIconBg: { backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 12 },
   sendBtn: { backgroundColor: 'white', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 15, gap: 8 },
   sendBtnText: { color: '#ea580c', fontWeight: '800' },
+
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 25 },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
   sectionDivider: { height: 1, backgroundColor: '#e5e7eb', marginHorizontal: 20, marginTop: 25 },
+
   audioContainer: { marginHorizontal: 20, marginTop: 15, backgroundColor: '#ecfdf5', borderRadius: 20, padding: 12, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#d1fae5' },
   audioPlayBtn: { backgroundColor: '#10b981', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   waveform: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3 },
@@ -517,6 +534,7 @@ const styles = StyleSheet.create({
   addVoiceText: { fontSize: 14, color: '#ea580c', fontWeight: '700' },
   micBtn: { alignSelf: 'center', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 5 },
   micText: { color: '#059669', fontSize: 12, fontWeight: '600' },
+
   sevasScroll: { paddingLeft: 20, marginTop: 15 },
   sevaItem: { alignItems: 'center', marginRight: 20, width: 80, position: 'relative' },
   sevaIcon: { width: 65, height: 65, borderRadius: 18, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', elevation: 2, borderWidth: 1, borderColor: '#f3f4f6' },
@@ -528,22 +546,31 @@ const styles = StyleSheet.create({
   sevaTextInput: { flex: 1, backgroundColor: 'white', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#e5e7eb' },
   saveSevaBtn: { marginLeft: 10, backgroundColor: '#ea580c', padding: 10, borderRadius: 10 },
   saveSevaText: { color: 'white', fontWeight: '700' },
+
+  referralCard: { marginHorizontal: 20, marginTop: 25, backgroundColor: '#fff7ed', padding: 15, borderRadius: 15, borderStyle: 'dashed', borderWidth: 1, borderColor: '#fed7aa', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  cardLabel: { fontSize: 12, fontWeight: '800', color: '#1f2937' },
+  referralCode: { fontSize: 18, fontWeight: '800', color: '#ea580c', marginVertical: 2 },
+  shareButton: { backgroundColor: 'white', padding: 10, borderRadius: 25, elevation: 2 },
+
   galleryScroll: { paddingLeft: 20, marginTop: 15 },
   galleryItem: { marginRight: 12, position: 'relative' },
   galleryImg: { width: 110, height: 110, borderRadius: 15 },
   galleryDelete: { position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.6)', padding: 4, borderRadius: 10 },
+
   contactList: { marginHorizontal: 20, marginTop: 5, gap: 10 },
   contactItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.5)', padding: 12, borderRadius: 15, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
   contactIconBg: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff7ed', alignItems: 'center', justifyContent: 'center' },
   contactLabel: { fontSize: 9, fontWeight: '800', color: '#9ca3af' },
   contactValue: { fontSize: 13, fontWeight: '700', color: '#1f2937' },
   contactInput: { fontSize: 13, fontWeight: '700', color: '#1f2937', padding: 0, margin: 0, borderBottomWidth: 1, borderBottomColor: '#ea580c' },
+
   socialEditContainer: { marginHorizontal: 20, marginTop: 15, gap: 10 },
   socialInputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 12, padding: 10, borderWidth: 1, borderColor: '#e5e7eb' },
   socialInputIcon: { marginRight: 10, width: 30, alignItems: 'center' },
   socialTextInput: { flex: 1, fontSize: 14, color: '#1f2937' },
   socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 15, marginTop: 20 },
   socialIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
+
   settingsList: { marginHorizontal: 20, marginTop: 10, gap: 10, marginBottom: 40 },
   settingsItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', padding: 15, borderRadius: 15 },
   settingsLabel: { marginLeft: 12, fontWeight: '600', color: '#1f2937' },

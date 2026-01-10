@@ -50,7 +50,7 @@ export default function ServiceListingPage() {
     const serviceName = typeof id === 'string' 
         ? id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') 
         : 'Service';
-
+    
     // Toggle Favorite
     const toggleFavorite = (id: number) => {
         setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
