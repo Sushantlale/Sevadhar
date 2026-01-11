@@ -33,7 +33,17 @@ export default function AdminLogin() {
       return;
     }
 
-    // 2. Credential Verification
+    // 2. Password Length Validation
+    if (formData.password.length < 8) {
+      showPopup(
+        "Invalid Password",
+        "Password must be at least 8 characters long",
+        "error"
+      );
+      return;
+    }
+
+    // 3. Credential Verification
     if (formData.email === "sevadhar@gmail.com" && formData.password === "sevadhar2025-26") {
       showPopup("Access Granted", "Welcome to Sevadhar Admin Panel", "success");
       
@@ -42,8 +52,19 @@ export default function AdminLogin() {
         router.push('/admin' as any); 
       }, 1000);
     } else {
-      // 3. Invalid Credentials Popup
+      // 4. Invalid Credentials Popup
       showPopup("Invalid Credentials", "The email or password you entered is incorrect.", "error");
+    }
+
+    if (formData.password.includes(' ')) {
+     showPopup("Invalid Password", "Password cannot contain spaces", "error");
+     return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+    showPopup("Invalid Email", "Please enter a valid email address", "error");
+      return;
     }
   };
 
@@ -142,12 +163,12 @@ const styles = StyleSheet.create({
   content: { padding: 25, paddingTop: 40 },
   logoArea: { alignItems: 'center', marginBottom: 40 },
   logoText: { fontSize: 42, fontWeight: 'bold', color: '#333' },
-  adminTag: { fontSize: 12, fontWeight: 'bold', color: '#FF7A00', letterSpacing: 2, marginTop: -5 },
+  adminTag: { fontSize: 10, fontWeight: 'bold', color: '#000000', letterSpacing: 2, marginTop: -3 },
   
   label: { fontSize: 14, fontWeight: '700', color: '#444', marginBottom: 8 },
   red: { color: 'red' },
   
-  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 15, height: 56, marginBottom: 20, borderWidth: 1, borderColor: '#EEE' },
+  inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFF', borderRadius: 12, paddingHorizontal: 15, height: 52, marginBottom: 20, borderWidth: 1, borderColor: '#EEE' },
   icon: { marginRight: 12 },
   input: { flex: 1, fontSize: 16 },
   loginBtn: { backgroundColor: '#FF7A00', height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', marginTop: 10, elevation: 2 },
