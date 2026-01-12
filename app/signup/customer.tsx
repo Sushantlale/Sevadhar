@@ -3,17 +3,17 @@ import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import {
   ChevronLeft,
-  User,
-  MapPin,
-  Home,
-  Phone,
-  Smartphone,
-  Mail,
-  Lock,
   Eye,
   EyeOff,
+  Home,
+  Lock,
+  Mail,
+  MapPin,
+  Navigation,
+  Phone,
+  Smartphone,
   Ticket,
-  Navigation
+  User,
 } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
@@ -24,12 +24,12 @@ import {
   Platform,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  StatusBar
+  View
 } from 'react-native';
 
 const localities = [
@@ -40,6 +40,7 @@ const localities = [
 export default function CustomerSignup() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [otpVerified, setOtpVerified] = useState(false);
@@ -52,18 +53,29 @@ export default function CustomerSignup() {
     email: '',
     otp: '',
     password: '',
+    confirmPassword: '',
     referralCode: '',
     agreeTerms: false,
   });
+
+  const passwordsMatch =
+  formData.password &&
+  formData.confirmPassword &&
+  formData.password === formData.confirmPassword;
 
   const handleSendOTP = () => {
     if (!formData.phone || formData.phone.length !== 10) {
       Alert.alert("Invalid Phone", "Please enter a valid 10-digit phone number");
       return;
     }
+  
     setOtpSent(true);
+    setOtpVerified(false);
+    setFormData({ ...formData, otp: '' });
+  
     Alert.alert("OTP Sent!", `A 6-digit code has been sent to ${formData.phone}`);
   };
+
 
   const handleVerifyOTP = () => {
     if (formData.otp.length === 6) {
@@ -90,6 +102,7 @@ export default function CustomerSignup() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+  
 
   const handleSubmit = () => {
     // 1. Mandatory Fields Check
@@ -104,25 +117,31 @@ export default function CustomerSignup() {
       return;
     }
 
-    // 3. Email Validation (If provided)
+    // 3. Confirm Password Validation
+    if (formData.password !== formData.confirmPassword) {
+      Alert.alert("Password Mismatch", "Passwords do not match.");
+      return;
+    }
+
+    // 4. Email Validation (If provided)
     if (formData.email && !isValidEmail(formData.email)) {
       Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
 
-    // 4. OTP Verification Check
+    // 5. OTP Verification Check
     if (!otpVerified) {
       Alert.alert("Verify OTP", "Please verify your phone number first");
       return;
     }
 
-    // 5. Terms Agreement Check
+    // 6. Terms Agreement Check
     if (!formData.agreeTerms) {
       Alert.alert("Terms", "You must agree to the Terms and Conditions");
       return;
     }
 
-    // Logic for successful registration
+    // 7. Logic for successful registration
     Alert.alert("Success", "Account created successfully!");
     router.push('/home');
   };
@@ -189,11 +208,11 @@ export default function CustomerSignup() {
               <View style={[styles.inputWrapper, { flex: 1, marginBottom: 0 }]}>
                 <Phone size={20} color="#94a3b8" style={styles.inputIcon} />
                 <TextInput
-                  placeholder="10-digit mobile number"
+                  placeholder="10-digit number"
                   placeholderTextColor="#94a3b8"
                   keyboardType="phone-pad"
                   maxLength={10}
-                  style={styles.input}
+                  style={styles.phoneInput}
                   onChangeText={(v) => setFormData({ ...formData, phone: v.replace(/[^0-9]/g, '') })}
                 />
               </View>
@@ -204,7 +223,7 @@ export default function CustomerSignup() {
           </View>
 
           {/* OTP Field */}
-          <View style={[styles.inputWrapper, { marginTop: 12 }]}>
+          {/* <View style={[styles.inputWrapper, { marginTop: 12 }]}>
             <Smartphone size={20} color="#94a3b8" style={styles.inputIcon} />
             <TextInput
               placeholder="Enter 6-digit OTP"
@@ -215,10 +234,64 @@ export default function CustomerSignup() {
               onChangeText={(v) => setFormData({ ...formData, otp: v })}
               onBlur={handleVerifyOTP}
             />
-          </View>
+          </View> */}
+
+          {/* OTP Input & Verify Button (Visible only after Send OTP) */}
+          {otpSent && (
+            <View style={[styles.inputGroup, { marginTop: 12 }]}>
+              <Text style={styles.label}>
+                Verify OTP <Text style={styles.asterisk}>*</Text>
+              </Text>
+          
+              <View style={styles.phoneRow}>
+                <View style={[styles.inputWrapper, { flex: 1, marginBottom: 0 }]}>
+                  <Smartphone size={20} color="#94a3b8" style={styles.inputIcon} />
+                  <TextInput
+                    placeholder="Enter 6-digit OTP"
+                    placeholderTextColor="#94a3b8"
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    style={styles.phoneInput}
+                    value={formData.otp}
+                    editable={!otpVerified}
+                    onChangeText={(v) =>
+                      setFormData({
+                        ...formData,
+                        otp: v.replace(/[^0-9]/g, ''),
+                      })
+                    }
+                  />
+                </View>
+          
+                {!otpVerified ? (
+                  <TouchableOpacity style={styles.otpButton} onPress={handleVerifyOTP}>
+                    <Text style={styles.otpButtonText}>Verify OTP</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View
+                    style={[
+                      styles.otpButton,
+                      { backgroundColor: '#16a34a' },
+                    ]}
+                  >
+                    <Text style={styles.otpButtonText}>Verified ✓</Text>
+                  </View>
+                )}
+              </View>
+          
+              {/* 👇 THIS is the only new part */}
+              {otpVerified && (
+                <Text style={styles.verifiedText}>
+                  ✓ Phone number verified successfully
+                </Text>
+              )}
+            </View>
+          )}
+          
+
 
           {/* Email */}
-          <View style={[styles.inputGroup, { marginTop: 24 }]}>
+          <View style={[styles.inputGroup, { marginTop: 15 }]}>
             <Text style={styles.label}>Email Address <Text style={styles.optional}>(Optional)</Text></Text>
             <View style={styles.inputWrapper}>
               <Mail size={20} color="#94a3b8" style={styles.inputIcon} />
@@ -239,7 +312,7 @@ export default function CustomerSignup() {
             <View style={styles.inputWrapper}>
               <Lock size={20} color="#94a3b8" style={styles.inputIcon} />
               <TextInput
-                placeholder="Create a strong password (min. 8 digits)"
+                placeholder="Min 8 digits Password"
                 placeholderTextColor="#94a3b8"
                 secureTextEntry={!showPassword}
                 style={styles.input}
@@ -250,6 +323,29 @@ export default function CustomerSignup() {
               </TouchableOpacity>
             </View>
           </View>
+
+          {/* Confirm Password */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              Confirm Password <Text style={styles.asterisk}>*</Text>
+            </Text>
+            <View style={styles.inputWrapper}>
+              <Lock size={20} color="#94a3b8" style={styles.inputIcon} />
+              <TextInput
+                placeholder="Re-enter your password"
+                placeholderTextColor="#94a3b8"
+                secureTextEntry={!showConfirmPassword}
+                style={styles.input}
+                onChangeText={(v) =>
+                  setFormData({ ...formData, confirmPassword: v })
+                }
+              />
+              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                {showConfirmPassword ? <EyeOff size={20} color="#94a3b8" /> : <Eye size={20} color="#94a3b8" />}
+              </TouchableOpacity>
+            </View>
+          </View>
+
 
           {/* Referral */}
           <View style={styles.inputGroup}>
@@ -328,8 +424,8 @@ export default function CustomerSignup() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF9F6' },
   scrollContent: { paddingHorizontal: 24, paddingTop: 20 },
-  backButton: { width: 40, height: 40, justifyContent: 'center', marginLeft: -10, marginBottom: 20 },
-  title: { fontSize: 32, fontWeight: '700', color: '#0f172a', letterSpacing: -0.5 },
+  backButton: { width: 40, height: 100, justifyContent: 'center', marginLeft: -10, marginBottom: 5 },
+  title: { fontSize: 32, fontWeight: '700', color: '#0f172a', letterSpacing: -0.5, paddingTop: -20 },
   subtitle: { fontSize: 16, color: '#64748b', marginTop: 4, marginBottom: 32 },
   
   inputGroup: { marginBottom: 16 },
@@ -345,7 +441,7 @@ const styles = StyleSheet.create({
     borderColor: '#f1f5f9',
     borderRadius: 16,
     paddingHorizontal: 16,
-    height: 58,
+    height: 55,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -353,19 +449,26 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   inputIcon: { marginRight: 12 },
-  input: { flex: 1, fontSize: 16, color: '#1e293b' },
-  inputText: { fontSize: 16, color: '#1e293b' },
+  input: { flex: 1, fontSize: 16, color: '#1e293b',alignContent:"center" },
+  inputText: { fontSize: 16, color: '#1e293b',alignContent:"center" },
   
   textAreaWrapper: { height: 110, alignItems: 'flex-start' },
   textArea: { height: '100%', paddingTop: 16, textAlignVertical: 'top' },
   
+  phoneInput: {
+  flex: 1,
+  fontSize: 16,
+  textAlign: 'left',
+  height: 55,
+  },
+
   phoneRow: { flexDirection: 'row', gap: 12 },
   otpButton: { 
     backgroundColor: '#FF7A00', 
     borderRadius: 16, 
     justifyContent: 'center', 
     paddingHorizontal: 18,
-    height: 58 
+    height: 55 
   },
   otpButtonText: { color: '#FFF', fontWeight: '700', fontSize: 14 },
 
@@ -401,5 +504,13 @@ const styles = StyleSheet.create({
   areaOption: { paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
   areaOptionText: { fontSize: 16, color: '#334155' },
   modalClose: { marginTop: 20, alignItems: 'center', padding: 10 },
-  modalCloseText: { color: '#94a3b8', fontSize: 16, fontWeight: '600' }
+  modalCloseText: { color: '#94a3b8', fontSize: 16, fontWeight: '600' },
+  verifiedText: {
+  marginTop: 8,
+  marginLeft: 8,
+  color: '#16a34a',
+  fontSize: 14,
+  fontWeight: '600',
+},
+
 });
