@@ -1,18 +1,19 @@
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Image,
-  SafeAreaView,
+  Dimensions,
+  Image, Platform, SafeAreaView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  StatusBar,
-  Dimensions
+  View
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 
-const { width } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('window');
+const LOGO_SIZE = Math.min(screenWidth * 0.5, 280);
+
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -82,7 +83,7 @@ export default function LandingScreen() {
             activeOpacity={0.9}
           >
             <Text style={styles.primaryBtnText}>Sign Up as Sevadhar</Text>
-            <MaterialIcons name="chevron-right" size={22} color="#FFF" />
+            {/* <MaterialIcons name="chevron-right" size={22} color="#FFF" /> */}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 12,
+    paddingTop: Platform.OS === 'web' ? 12 : 50,
     flexDirection: 'row',
     justifyContent: 'flex-end',
     alignItems: 'center',
@@ -146,8 +147,8 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   langBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: Platform.OS === 'web' ? 10 : 16,
+    paddingVertical: Platform.OS === 'web' ? 3 : 6,
     borderRadius: 20,
   },
   langBtnActive: {
@@ -162,42 +163,46 @@ const styles = StyleSheet.create({
     color: '#FFF',
   },
   main: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 30,
-    marginTop: -40, // Pull main content up slightly
+  flex: 1,
+  alignItems: 'center',
+  justifyContent: 'flex-start',
+  paddingHorizontal: Platform.OS === 'web' ? 20 : 30,
+  paddingTop: Platform.OS === 'web' ? 10 : 20,
+    // ✅ KEY FIX
+  paddingBottom: Platform.OS === 'web' ? 120 : 0,
   },
+
   logoWrapper: {
     position: 'relative',
-    marginBottom: 40,
-    marginTop: 20, // Add space from top switcher
+    marginBottom: 5,
+    marginTop: 5, // Add space from top switcher
   },
   outerCircle: {
-    width: width * 0.6,
-    height: width * 0.6,
-    borderRadius: (width * 0.6) / 2,
-    backgroundColor: '#FDF3E7', 
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
+  width: LOGO_SIZE-10,
+  height: LOGO_SIZE-10,
+  borderRadius: LOGO_SIZE / 2,
+  backgroundColor: '#FDF3E7',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden',
   },
+
   logo: {
     width: '75%',
     height: '75%',
   },
   textGroup: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 20,
   },
   brandTitle: {
-    fontSize: 54,
+    fontSize: 48,
     fontWeight: '900',
     color: '#FF7F00',
     letterSpacing: -1,
   },
   brandTagline: {
-    fontSize: 13,
+    fontSize: 10,
     fontWeight: '700',
     color: '#334155',
     letterSpacing: 1.2,
@@ -205,7 +210,7 @@ const styles = StyleSheet.create({
   },
   description: {
     textAlign: 'center',
-    fontSize: 18,
+    fontSize: 14,
     color: '#64748b',
     marginTop: 25,
     lineHeight: 26,
@@ -216,11 +221,11 @@ const styles = StyleSheet.create({
   },
   buttonGroup: {
     width: '100%',
-    gap: 18,
+    gap: 15,
   },
   primaryBtn: {
     backgroundColor: '#FF7F00',
-    height: 64,
+    height: 60,
     borderRadius: 32,
     flexDirection: 'row',
     alignItems: 'center',
@@ -233,13 +238,13 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: {
     color: '#FFF',
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '800',
     marginRight: 10,
   },
   outlineBtn: {
     backgroundColor: 'transparent',
-    height: 64,
+    height: 60,
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
@@ -248,12 +253,14 @@ const styles = StyleSheet.create({
   },
   outlineBtnText: {
     color: '#FF7F00',
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '800',
   },
   footer: {
-    paddingBottom: 10,
+    // paddingBottom: 40,
     alignItems: 'center',
+    paddingBottom: Platform.OS === 'web' ? 20 : 60, 
+    marginTop: 20,
   },
   signInRow: {
     flexDirection: 'row',

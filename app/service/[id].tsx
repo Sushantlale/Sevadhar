@@ -1,3 +1,6 @@
+import { Audio } from 'expo-av';
+/*import { BlurView } from 'expo-blur';*/
+import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
     ArrowLeft,
@@ -36,10 +39,109 @@ const mockWorkers = [
     { id: 4, name: 'Lakshmi Devi', location: 'Dadar, Mumbai', rating: 4.9, reviews: 45, jobsCompleted: 456, isVerified: true, isAvailable: true, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200', voiceTime: '0:18' },
 ];
 
+
 export default function ServiceListingPage() {
     const { id } = useLocalSearchParams();
     const router = useRouter();
+
+    // State for location selection
+    const [selectedLocation, setSelectedLocation] = useState('Khopoli');
+    const [locationModalVisible, setLocationModalVisible] = useState(false);
+
+    // Voice Search states
+    const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingResult, setRecordingResult] = useState<string | null>(null);
+
+    // Audio playback state
+    const [playingId, setPlayingId] = useState<number | null>(null);
+    const [sound, setSound] = useState<Audio.Sound | null>(null);
+
+
+    const stopRecording = async () => {
+  setIsRecording(false);
+
+  // ⛔ Placeholder for speech-to-text result
+  // Replace later with real STT (Google / Whisper / Azure)
+  const fakeText = 'Plumber';
+
+  setRecordingResult(fakeText);
+  setSearchQuery(fakeText);
+};
+
+    const startVoiceSearch = async () => {
+  const permission = await Audio.requestPermissionsAsync();
+  if (!permission.granted) {
+    alert('Microphone permission is required');
+    return;
+  }
+
+  setVoiceModalVisible(true);
+  setRecordingResult(null);
+};
+
+const startRecording = async () => {
+  try {
+    setIsRecording(true);
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    });
+  } catch (err) {
+    console.log('Recording error', err);
+  }
+};
     
+    const toggleVoiceIntro = async (worker: any) => {
+  try {
+    // Stop if same audio is playing
+    if (playingId === worker.id && sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+      setSound(null);
+      setPlayingId(null);
+      return;
+    }
+
+    // Stop previous audio
+    if (sound) {
+      await sound.stopAsync();
+      await sound.unloadAsync();
+    }
+
+    // Load & play new audio (mock URL for now)
+    const { sound: newSound } = await Audio.Sound.createAsync(
+      {
+        uri: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      },
+      { shouldPlay: true }
+    );
+
+    setSound(newSound);
+    setPlayingId(worker.id);
+
+    newSound.setOnPlaybackStatusUpdate((status) => {
+      if (!status.isLoaded) {
+        console.log('Playback error:', status.error);
+        return;
+      }
+    
+      if (status.didJustFinish) {
+        setPlayingId(null);
+        newSound.unloadAsync();
+      }
+    });
+
+
+  } catch (err) {
+    console.log('Audio error:', err);
+  }
+};
+
+    const [callModalVisible, setCallModalVisible] = useState(false);
+    const [selectedWorker, setSelectedWorker] = useState<any>(null);
+   
+
     // States for filtering
     const [searchQuery, setSearchQuery] = useState('');
     const [filterVerified, setFilterVerified] = useState(false);
@@ -108,9 +210,17 @@ export default function ServiceListingPage() {
 
                 {/* Voice Intro Waveform Box */}
                 <View style={styles.voiceIntroBox}>
-                    <View style={styles.playCircle}>
+                    <TouchableOpacity
+                      style={styles.playCircle}
+                      onPress={() => toggleVoiceIntro(item)}
+                    >
+                      {playingId === item.id ? (
+                        <View style={{ width: 10, height: 10, backgroundColor: '#F27C0D' }} />
+                      ) : (
                         <Play size={14} color="#F27C0D" fill="#F27C0D" />
-                    </View>
+                      )}
+                    </TouchableOpacity>
+
                     <View style={styles.waveformContainer}>
                         <Text style={styles.voiceLabel}>Voice Intro</Text>
                         <View style={styles.waveform}>
@@ -125,7 +235,13 @@ export default function ServiceListingPage() {
 
             {/* Action Buttons */}
             <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.callNowBtn}>
+                <TouchableOpacity
+                  style={styles.callNowBtn}
+                  onPress={() => {
+                  setSelectedWorker(item);
+                  setCallModalVisible(true);
+                 }}
+                >
                     <Phone size={18} color="#FFF" fill="#FFF" />
                     <Text style={styles.callNowText}>Call Now</Text>
                 </TouchableOpacity>
@@ -151,10 +267,14 @@ export default function ServiceListingPage() {
                 </TouchableOpacity>
                 <View style={styles.headerTitleCenter}>
                     <Text style={styles.headerTitleMain}>{serviceName}</Text>
-                    <TouchableOpacity style={styles.locSelector}>
-                        <Text style={styles.locSelectorText}>Khopoli</Text>
-                        <ChevronDown size={14} color="#6B7280" />
+                    <TouchableOpacity
+                      style={styles.locSelector}
+                      onPress={() => setLocationModalVisible(true)}
+                    >                    
+                     <Text style={styles.locSelectorText}>{selectedLocation}</Text>
+                     <ChevronDown size={14} color="#6B7280" />
                     </TouchableOpacity>
+
                 </View>
                 <View style={{ width: 40 }} />
             </View>
@@ -169,7 +289,10 @@ export default function ServiceListingPage() {
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
-                    <TouchableOpacity><Mic size={20} color="#F27C0D" /></TouchableOpacity>
+                    <TouchableOpacity onPress={startVoiceSearch}>
+                      <Mic size={20} color="#F27C0D" />
+                    </TouchableOpacity>
+
                 </View>
             </View>
 
@@ -217,18 +340,189 @@ export default function ServiceListingPage() {
                         <Text style={styles.emptyText}>No matches found</Text>
                     </View>
                 )}
+
             />
+
+            {/* Location Selector Modal */}
+            {locationModalVisible && (
+              <View style={styles.modalOverlay}>
+                <View style={styles.locationModal}>
+                  <View style={styles.dragHandle} />
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Select Location</Text>
+                    <TouchableOpacity onPress={() => setLocationModalVisible(false)}>
+                      <Text style={styles.modalClose}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+            
+                  {['Khopoli', 'Khalapur'].map((loc) => (
+                    <TouchableOpacity
+                      key={loc}
+                      style={styles.locationOption}
+                      onPress={() => {
+                        setSelectedLocation(loc);
+                        setLocationModalVisible(false);
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.locationText1,
+                          selectedLocation === loc && styles.locationActive,
+                        ]}
+                      >
+                        {loc}
+                      </Text>
+                      {selectedLocation === loc && <Text style={styles.checkMark}>✓</Text>}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {voiceModalVisible && (
+            <View style={styles.modalOverlay}>
+              <View style={styles.voiceModal}>
+          
+                {/* Close */}
+                <TouchableOpacity
+                  style={styles.voiceClose}
+                  onPress={() => {
+                    setVoiceModalVisible(false);
+                    setIsRecording(false);
+                  }}
+                >
+                  <Text style={{ fontSize: 18 }}>✕</Text>
+                </TouchableOpacity>
+          
+                {/* TITLE */}
+                <Text style={styles.voiceTitle}>Voice Search</Text>
+          
+                {/* STATE 1: BEFORE RECORD */}
+                {!isRecording && !recordingResult && (
+                  <>
+                    <Text style={styles.voiceHint}>Tap the microphone to speak</Text>
+          
+                    <TouchableOpacity
+                      style={styles.voiceMicBtn}
+            onPress={startRecording}
+                    >
+                      <Mic size={28} color="#FFF" />
+                    </TouchableOpacity>
+                  </>
+                )}
+          
+                {/* STATE 2: RECORDING */}
+                {isRecording && (
+                  <>
+                    <Text style={styles.voiceHint}>Listening...</Text>
+          
+                    <TouchableOpacity
+                      style={[styles.voiceMicBtn, { backgroundColor: '#EF4444' }]}
+                      onPress={stopRecording}
+                    >
+                      <Mic size={28} color="#FFF" />
+                    </TouchableOpacity>
+          
+                    <Text style={styles.voiceSubText}>
+                      "Finding the best plumbers near you..."
+                    </Text>
+                  </>
+                )}
+          
+                {/* STATE 3: RESULT */}
+                {recordingResult && (
+                  <>
+                    <Text style={styles.voiceHint}>Search result</Text>
+          
+                    <View style={styles.voiceResultBox}>
+                      <Text style={styles.voiceResultText}>
+                        "{recordingResult}"
+                      </Text>
+                    </View>
+          
+                    <View style={{ flexDirection: 'row', gap: 12 }}>
+                      <TouchableOpacity
+                        style={styles.tryAgainBtn}
+                        onPress={() => {
+                          setRecordingResult(null);
+                          setIsRecording(false);
+                        }}
+                      >
+                        <Text style={styles.tryAgainText}>Try Again</Text>
+                      </TouchableOpacity>
+          
+                      <TouchableOpacity
+                        style={styles.searchBtn}
+                        onPress={() => setVoiceModalVisible(false)}
+                      >
+                        <Text style={styles.searchBtnText}>Search</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
+              </View>
+            </View>
+            )}
+
+            {callModalVisible && selectedWorker && (
+  <View style={styles.modalOverlay}>
+    
+    {/* Blur Background */}
+    {/*<BlurView intensity={40} tint="dark" style={StyleSheet.absoluteFill} />*/}
+
+    {/* Modal Card */}
+    <View style={styles.callModal}>
+      <Image
+        source={{ uri: selectedWorker.image }}
+        style={styles.callProfileImg}
+      />
+
+      <Text style={styles.callTitle}>Call Confirmation</Text>
+
+      <Text style={styles.callText}>
+        Would you like to place a call to{"\n"}
+        <Text style={{ fontWeight: '800' }}>
+          {selectedWorker.name}
+        </Text>
+        ?
+      </Text>
+
+      <TouchableOpacity
+        style={styles.callConfirmBtn}
+        onPress={() => {
+          setCallModalVisible(false);
+
+          // Random mock number
+          const randomNumber = `tel:+91${Math.floor(9000000000 + Math.random() * 1000000000)}`;
+          Linking.openURL(randomNumber);
+        }}
+      >
+        <Phone size={18} color="#FFF" />
+        <Text style={styles.callConfirmText}>Call Now</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => setCallModalVisible(false)}
+      >
+        <Text style={styles.callCancel}>Cancel</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
+
+
         </SafeAreaView>
+        
     );
 }
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: '#F8F7F5' },
-    headerNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 4 : 10, height: 60 },
-    backCircle: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
-    headerTitleCenter: { alignItems: 'center' },
+    headerNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 10 : 10, height: 80 },
+    backCircle: { width: 40, height: 80, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+    headerTitleCenter: { alignItems: 'center', paddingTop: 6 },
     headerTitleMain: { fontSize: 18, fontWeight: '800', color: '#111' },
-    locSelector: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
+    locSelector: { flexDirection: 'row', alignItems: 'center', marginTop: 0, paddingTop: 0 },
     locSelectorText: { fontSize: 12, color: '#6B7280', marginRight: 4, fontWeight: '500' },
     
     searchSection: { padding: 16 },
@@ -254,14 +548,14 @@ const styles = StyleSheet.create({
     workerName: { fontSize: 17, fontWeight: '800', color: '#111' },
     verifiedBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFF6FF', paddingHorizontal: 6, paddingVertical: 3, borderRadius: 6, gap: 3 },
     verifiedText: { fontSize: 9, fontWeight: '900', color: '#2563EB' },
-    locationText: { fontSize: 13, color: '#6B7280', marginTop: 2 },
+    locationText1: { fontSize: 13, color: '#6B7280', marginTop: 2 },
     
     statsRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
     ratingValue: { fontSize: 13, fontWeight: '800', color: '#111', marginLeft: 4 },
     statSub: { fontSize: 13, color: '#9CA3AF', marginLeft: 4 },
     bullet: { marginHorizontal: 6, color: '#E5E7EB' },
 
-    voiceIntroBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 16, padding: 10, marginTop: 16 },
+    voiceIntroBox: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', backgroundColor: '#F9FAFB', borderRadius: 16, padding: 10, marginTop: 16 },
     playCircle: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#FFF', justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5, elevation: 2 },
     waveformContainer: { flex: 1, marginLeft: 12 },
     voiceLabel: { fontSize: 11, fontWeight: '700', color: '#374151' },
@@ -276,5 +570,215 @@ const styles = StyleSheet.create({
     favBtnActive: { borderColor: '#FEE2E2', backgroundColor: '#FFF' },
 
     emptyState: { alignItems: 'center', marginTop: 60 },
-    emptyText: { marginTop: 10, color: '#9CA3AF', fontWeight: '600' }
+    emptyText: { marginTop: 10, color: '#9CA3AF', fontWeight: '600' },
+
+    modalOverlay: {
+  position: 'absolute',
+  left: 0,
+  right: 0,
+  top: 0,
+  bottom: 0,
+  backgroundColor: 'rgba(0,0,0,0.3)',
+  justifyContent: 'center',   // ✅ CENTER vertically
+  alignItems: 'center',       // ✅ CENTER horizontally
+},
+
+dragHandle: {
+  width: 40,
+  height: 4,
+  borderRadius: 2,
+  backgroundColor: '#E5E7EB',
+  alignSelf: 'center',
+  marginBottom: 12,
+},
+
+
+locationModal: {
+  backgroundColor: '#FFF',
+  width: '70%',                 // ✅ full width
+  borderTopLeftRadius: 24,
+  borderTopRightRadius: 24,
+  borderBottomLeftRadius: 24,
+  borderBottomRightRadius: 24,
+  paddingHorizontal: 20,
+  paddingTop: 16,
+  paddingBottom: 24,
+},
+
+
+modalHeader: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  marginBottom: 4,
+},
+
+modalTitle: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#111',
+},
+
+modalClose: {
+  fontSize: 18,
+  color: '#6B7280',
+},
+
+locationOption: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  paddingVertical: 16,
+},
+
+locationText: {
+  fontSize: 15,
+  color: '#111',
+},
+
+locationActive: {
+  color: '#F27C0D',
+  fontWeight: '700',
+},
+
+checkMark: {
+  color: '#F27C0D',
+  fontSize: 16,
+  fontWeight: '700',
+},
+
+voiceModal: {
+  backgroundColor: '#FFF',
+  marginHorizontal: 30,
+  borderRadius: 24,
+  padding: 24,
+  alignItems: 'center',
+},
+
+voiceClose: {
+  position: 'absolute',
+  right: 16,
+  top: 16,
+},
+
+voiceTitle: {
+  fontSize: 18,
+  fontWeight: '800',
+  color: '#111',
+},
+
+voiceHint: {
+  marginTop: 10,
+  color: '#6B7280',
+  fontWeight: '600',
+},
+
+voiceMicBtn: {
+  marginTop: 24,
+  width: 80,
+  height: 80,
+  borderRadius: 40,
+  backgroundColor: '#F27C0D',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
+voiceSubText: {
+  marginTop: 12,
+  fontSize: 12,
+  color: '#9CA3AF',
+  fontStyle: 'italic',
+},
+
+voiceResultBox: {
+  marginVertical: 16,
+  backgroundColor: '#FFF7ED',
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  borderRadius: 12,
+},
+
+voiceResultText: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#111',
+},
+
+tryAgainBtn: {
+  borderWidth: 1,
+  borderColor: '#F27C0D',
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  borderRadius: 12,
+},
+
+tryAgainText: {
+  color: '#F27C0D',
+  fontWeight: '700',
+},
+
+searchBtn: {
+  backgroundColor: '#F27C0D',
+  paddingHorizontal: 20,
+  paddingVertical: 10,
+  borderRadius: 12,
+},
+
+searchBtnText: {
+  color: '#FFF',
+  fontWeight: '700',
+},
+
+callModal: {
+  backgroundColor: '#FFF',
+  width: '80%',
+  borderRadius: 28,
+  padding: 24,
+  alignItems: 'center',
+},
+
+callProfileImg: {
+  width: 70,
+  height: 70,
+  borderRadius: 35,
+  marginBottom: 12,
+},
+
+callTitle: {
+  fontSize: 16,
+  fontWeight: '800',
+  color: '#111',
+  marginBottom: 6,
+},
+
+callText: {
+  fontSize: 14,
+  color: '#6B7280',
+  textAlign: 'center',
+  marginBottom: 20,
+},
+
+callConfirmBtn: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  backgroundColor: '#F27C0D',
+  paddingVertical: 14,
+  borderRadius: 18,
+  width: '100%',
+  justifyContent: 'center',
+},
+
+callConfirmText: {
+  color: '#FFF',
+  fontWeight: '800',
+  fontSize: 15,
+},
+
+callCancel: {
+  marginTop: 14,
+  color: '#6B7280',
+  fontWeight: '600',
+},
+
 });
