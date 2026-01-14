@@ -1,7 +1,10 @@
 
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import * as Linking from 'expo-linking';
+import { FlatList } from 'react-native';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -31,8 +34,29 @@ const ProfileDetails = () => {
     profileImage = "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400" 
   } = params;
 
+  const [galleryVisible, setGalleryVisible] = React.useState(false);
+  const [showWorkPhotos, setShowWorkPhotos] = useState(false);
+
+
+  const workPhotos = [
+  'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400',
+  'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400',
+  'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+  'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400',
+  'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400',
+  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+  'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400',
+  // 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400',
+  // 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400',
+  ];
+
+  const [callModalVisible, setCallModalVisible] = React.useState(false);
+
+
   return (
     <SafeAreaView style={styles.container}>
+      <View style={{ flex: 1, position: 'relative' }}>
       <StatusBar barStyle="dark-content" />
       
       {/* 1. STICKY NAVBAR */}
@@ -42,12 +66,12 @@ const ProfileDetails = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile Details</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconBtn}>
+          {/* <TouchableOpacity style={styles.iconBtn}>
             <MaterialIcons name="share" size={22} color="#333" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconBtn}>
             <MaterialIcons name="bookmark-border" size={24} color="#333" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -73,17 +97,20 @@ const ProfileDetails = () => {
                   <Text style={styles.ratingText}>{rating}</Text>
                 </View>
                 <View style={styles.jobRow}>
-                   <MaterialIcons name="work-outline" size={14} color="#666" />
-                   <Text style={styles.jobText}>{jobs} jobs</Text>
+                   <MaterialIcons name="call" size={14} color="#666" />
+                   <Text style={styles.jobText}>{jobs} Calls</Text>
                 </View>
               </View>
             </View>
-            <TouchableOpacity style={styles.playBtn}>
-              <MaterialIcons name="play-arrow" size={24} color="#FF7A00" />
-            </TouchableOpacity>
+            <View style={styles.verifiedBadge}>
+              <View style={styles.verifiedIcon}>
+                <MaterialIcons name="check" size={12} color="#2563EB" />
+              </View>
+              <Text style={styles.verifiedText}>VERIFIED</Text>
+            </View>
           </View>
 
-          <View style={styles.badgeRow}>
+          {/* <View style={styles.badgeRow}>
             <View style={[styles.statusBadge, {backgroundColor: '#0D9488'}]}>
               <Text style={styles.statusBadgeText}>Verified</Text>
             </View>
@@ -94,13 +121,23 @@ const ProfileDetails = () => {
             <View style={[styles.statusBadge, {backgroundColor: '#22C55E'}]}>
               <Text style={styles.statusBadgeText}>Available</Text>
             </View>
+          </View> */}
+
+          <View style={styles.badgeRow}>
+            <TouchableOpacity style={styles.playBtn}>
+               <MaterialIcons name="play-arrow" size={24} color="#FF7A00" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.callBtn}>
+            <TouchableOpacity
+              style={styles.callBtn}
+              onPress={() => setCallModalVisible(true)}
+            >            
               <MaterialIcons name="call" size={20} color="#FFF" />
               <Text style={styles.callText}>Call Now</Text>
             </TouchableOpacity>
+
             <TouchableOpacity style={styles.saveBtn}>
               <MaterialIcons name="favorite-border" size={20} color="#666" />
               <Text style={styles.saveText}>Save</Text>
@@ -112,12 +149,18 @@ const ProfileDetails = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Work Photos</Text>
-            <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity>
+            {/* <TouchableOpacity><Text style={styles.viewAll}>View All</Text></TouchableOpacity> */}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.photoScroll}>
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1581578731548-c64695cc6958?w=400' }} style={styles.workPhoto} />
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=400' }} style={styles.workPhoto} />
-            <Image source={{ uri: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400' }} style={styles.workPhoto} />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoScrollContent}>
+            {workPhotos.map((img, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => setGalleryVisible(true)}
+                activeOpacity={0.9}
+              >
+                <Image source={{ uri: img }} style={styles.workPhoto} />
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 
@@ -168,15 +211,15 @@ const ProfileDetails = () => {
         </View>
 
         {/* 7. START YOUR REVIEW */}
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
             <Text style={styles.subTitle}>Start your Review</Text>
             <View style={styles.starRowLarge}>
                 {[1,2,3,4,5].map(i => <MaterialIcons key={i} name="star-outline" size={36} color="#D1D5DB" />)}
             </View>
-        </View>
+        </View> */}
 
         {/* 8. RECENT TREND SECTION */}
-        <View style={styles.card}>
+        {/* <View style={styles.card}>
             <Text style={styles.subTitle}>Recent rating trend</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.trendScroll}>
                 {['3.0', '5.0', '1.0', '5.0', '5.0'].map((val, i) => (
@@ -186,15 +229,15 @@ const ProfileDetails = () => {
                     </View>
                 ))}
             </ScrollView>
-        </View>
+        </View> */}
 
         {/* 9. USER REVIEWS SECTION */}
         <View style={styles.card}>
             <Text style={styles.subTitle}>User Reviews</Text>
             <View style={styles.filterRow}>
-                <TouchableOpacity style={[styles.filterTag, styles.filterActive]}><Text style={styles.filterActiveText}>Relevant</Text></TouchableOpacity>
+                {/* <TouchableOpacity style={[styles.filterTag, styles.filterActive]}><Text style={styles.filterActiveText}>Relevant</Text></TouchableOpacity>
                 <TouchableOpacity style={styles.filterTag}><Text style={styles.filterTagText}>Latest</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.filterTag}><Text style={styles.filterTagText}>High to Low</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.filterTag}><Text style={styles.filterTagText}>High to Low</Text></TouchableOpacity> */}
             </View>
 
             {/* Review Card 1 */}
@@ -210,17 +253,17 @@ const ProfileDetails = () => {
                     </View>
                     <Text style={styles.reviewDate}>18 Jun 2025</Text>
                 </View>
-                <View style={styles.poorServiceBadge}>
+                {/* <View style={styles.poorServiceBadge}>
                     <MaterialIcons name="thumb-down-off-alt" size={14} color="#EF4444" />
                     <Text style={styles.poorServiceText}>Poor service</Text>
-                </View>
+                </View> */}
                 <Text style={styles.reviewText}>
                     "My experience with Mansi Electrical Contractor was terrible. The service was slow, and the technicians seemed unprofessional..."
                 </Text>
                 <View style={styles.reviewActionRow}>
-                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-up-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Helpful</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-up-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-down-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Dislike</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="chat-bubble-outline" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Comment</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="share" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Share</Text></TouchableOpacity>
                 </View>
             </View>
 
@@ -242,16 +285,96 @@ const ProfileDetails = () => {
                     Lakshmi did acts great job. Very polite and thorough with her cleaning.
                 </Text>
                 <View style={styles.reviewActionRow}>
-                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-up-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Helpful</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-up-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Like</Text></TouchableOpacity>
+                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="thumb-down-off-alt" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Dislike</Text></TouchableOpacity>
                     <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="chat-bubble-outline" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Comment</Text></TouchableOpacity>
-                    <TouchableOpacity style={styles.reviewAction}><MaterialIcons name="share" size={18} color="#6B7280" /><Text style={styles.actionLabel}>Share</Text></TouchableOpacity>
                 </View>
             </View>
         </View>
 
-      </ScrollView>
-    </SafeAreaView>
-  );
+            {/* Header */}
+        {/* <View style={styles.galleryHeader}>
+          <TouchableOpacity onPress={() => setGalleryVisible(false)}>
+            <MaterialIcons name="close" size={26} color="#111" />
+          </TouchableOpacity>
+          <Text style={styles.galleryTitle}>Work Photos</Text>
+          <View style={{ width: 26 }} />
+        </View> */}
+    
+        {/* Grid */}
+       {/* <ScrollView contentContainerStyle={styles.galleryGrid}>
+          {workPhotos.map((img, index) => (
+            <Image key={index} source={{ uri: img }} style={styles.galleryImage} />
+          ))}
+        </ScrollView> */}
+    
+
+          </ScrollView>
+
+        {callModalVisible && (
+  <View style={styles.modalOverlay}>
+
+    <View style={styles.callModal}>
+      <Image
+        source={{ uri: profileImage as string }}
+        style={styles.callProfileImg}
+      />
+
+      <Text style={styles.callTitle}>Call Confirmation</Text>
+
+      <Text style={styles.callTextModal}>
+        Would you like to place a call to{"\n"}
+        <Text style={{ fontWeight: '800' }}>{name}</Text>?
+      </Text>
+
+      <TouchableOpacity
+        style={styles.callConfirmBtn}
+        onPress={() => {
+          setCallModalVisible(false);
+          const randomNumber = `tel:+91${Math.floor(
+            9000000000 + Math.random() * 1000000000
+          )}`;
+          Linking.openURL(randomNumber);
+        }}
+      >
+        <MaterialIcons name="call" size={18} color="#FFF" />
+        <Text style={styles.callConfirmText}>Call Now</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => setCallModalVisible(false)}>
+        <Text style={styles.callCancel}>Cancel</Text>
+      </TouchableOpacity>
+    </View>
+
+  </View>
+)}
+
+{showWorkPhotos && (
+  <View style={styles.photoModalOverlay}>
+    <View style={styles.photoModalHeader}>
+      <TouchableOpacity onPress={() => setShowWorkPhotos(false)}>
+        <Text style={styles.closeText}>✕</Text>
+      </TouchableOpacity>
+      <Text style={styles.modalTitle}>Work Photos</Text>
+      <View style={{ width: 24 }} />
+    </View>
+
+    <FlatList
+      data={workPhotos}
+      numColumns={2}
+      keyExtractor={(item, index) => index.toString()}
+      renderItem={({ item }) => (
+        <Image source={{ uri: item }} style={styles.largePhoto} />
+      )}
+      contentContainerStyle={{ padding: 12 }}
+    />
+  </View>
+)}
+
+
+        </View>
+        </SafeAreaView>
+      );
 };
 
 const styles = StyleSheet.create({
@@ -265,7 +388,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 10 : 10,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 20 : 20,
   },
   headerTitle: { fontSize: 17, fontWeight: '700', color: '#111' },
   headerRight: { flexDirection: 'row', gap: 5 },
@@ -365,7 +488,16 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 17, fontWeight: '700', color: '#111' },
   viewAll: { color: '#FF7A00', fontSize: 14, fontWeight: '700' },
   photoScroll: { paddingBottom: 10 },
-  workPhoto: { width: 150, height: 110, borderRadius: 12, marginRight: 12 },
+  
+
+  workPhoto: {
+  width: 150,
+  height: 110,
+  borderRadius: 14,
+  marginRight: 12,
+  backgroundColor: '#E5E7EB',
+},
+
 
   cardTitle: { fontSize: 16, fontWeight: '700', color: '#111', marginBottom: 8 },
   aboutText: { fontSize: 14, color: '#4B5563', lineHeight: 22, marginBottom: 15 },
@@ -446,7 +578,176 @@ const styles = StyleSheet.create({
   reviewText: { fontSize: 14, color: '#4B5563', lineHeight: 22, marginBottom: 15 },
   reviewActionRow: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 4 },
   reviewAction: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  actionLabel: { fontSize: 13, color: '#6B7280', fontWeight: '600' }
+  actionLabel: { fontSize: 13, color: '#6B7280', fontWeight: '600' },
+
+  verifiedBadge: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#EFF6FF',
+  paddingHorizontal: 10,
+  paddingVertical: 6,
+  borderRadius: 20,
+  borderWidth: 1,
+  borderColor: '#DBEAFE',
+},
+
+verifiedIcon: {
+  width: 18,
+  height: 18,
+  borderRadius: 9,
+  backgroundColor: '#DBEAFE',
+  justifyContent: 'center',
+  alignItems: 'center',
+  marginRight: 6,
+},
+
+verifiedText: {
+  fontSize: 11,
+  fontWeight: '800',
+  color: '#2563EB',
+  letterSpacing: 0.6,
+},
+
+photoScrollContent: {
+  paddingLeft: 4,
+  paddingRight: 8,
+},
+
+galleryHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: 16,
+  borderBottomWidth: 1,
+  borderBottomColor: '#E5E7EB',
+},
+
+galleryTitle: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#111',
+},
+
+galleryGrid: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  padding: 8,
+},
+
+galleryImage: {
+  width: width / 3 - 12,
+  height: width / 3 - 12,
+  margin: 6,
+  borderRadius: 12,
+  backgroundColor: '#E5E7EB',
+},
+
+modalOverlay: {
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
+  backgroundColor: 'rgba(0,0,0,0.4)',
+  justifyContent: 'center',
+  alignItems: 'center',
+  zIndex: 9999,
+  elevation: 20, // Android fix
+},
+
+
+callModal: {
+  backgroundColor: '#FFF',
+  width: '80%',
+  borderRadius: 28,
+  padding: 24,
+  alignItems: 'center',
+},
+
+callProfileImg: {
+  width: 70,
+  height: 70,
+  borderRadius: 35,
+  marginBottom: 12,
+},
+
+callTitle: {
+  fontSize: 16,
+  fontWeight: '800',
+  color: '#111',
+  marginBottom: 6,
+},
+
+callTextModal: {
+  fontSize: 14,
+  color: '#6B7280',
+  textAlign: 'center',
+  marginBottom: 20,
+},
+
+callConfirmBtn: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 8,
+  backgroundColor: '#FF7A00',
+  paddingVertical: 14,
+  borderRadius: 18,
+  width: '100%',
+  justifyContent: 'center',
+},
+
+callConfirmText: {
+  color: '#FFF',
+  fontWeight: '800',
+  fontSize: 15,
+},
+
+callCancel: {
+  marginTop: 14,
+  color: '#6B7280',
+  fontWeight: '600',
+},
+
+photoModalOverlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: '#fff',
+  zIndex: 9999,
+  elevation: 20,
+},
+
+photoModalHeader: {
+  height: 56,
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  paddingHorizontal: 16,
+  borderBottomWidth: 1,
+  borderColor: '#eee',
+},
+
+largePhoto: {
+  width: '48%',
+  height: 180,
+  margin: '1%',
+  borderRadius: 12,
+},
+
+closeText: {
+  fontSize: 22,
+  fontWeight: '600',
+},
+
+modalTitle: {
+  fontSize: 16,
+  fontWeight: '700',
+  color: '#111',
+},
+
+
 });
 
 export default ProfileDetails;
