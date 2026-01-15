@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Hammer, History, Heart, User } from 'lucide-react-native';
+import { Hammer, Heart, History, Home, User } from 'lucide-react-native';
 import { Platform } from 'react-native';
 
 export default function TabLayout() {
@@ -13,8 +13,13 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 10,
           fontWeight: '600',
-          marginBottom: 5,
+          marginBottom: 2,
         },
+        tabBarItemStyle: {
+         justifyContent: 'center',
+         alignItems: 'center',
+        },
+
         tabBarStyle: {
           position: 'absolute',
           bottom: 20,
@@ -23,9 +28,10 @@ export default function TabLayout() {
           elevation: 5, // Android shadow
           backgroundColor: '#FFFFFF', // ✅ WHITE BACKGROUND
           borderRadius: 30,
-          height: 65,
+          height: 60,
           borderTopWidth: 0,
-          paddingBottom: Platform.OS === 'ios' ? 15 : 10,
+          paddingTop: Platform.OS === 'web' ? 10 : 2,
+          paddingBottom: Platform.OS === 'web' ? 10 : 6,
 
           // subtle border so white tab is visible
           borderWidth: 1,
