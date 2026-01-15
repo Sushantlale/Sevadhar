@@ -11,12 +11,13 @@ import {
   Switch,
   Alert,
   TextInput,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import {
-  Edit3,
+  Settings2,
   Star,
   CheckCircle2,
   Bell,
@@ -31,9 +32,7 @@ import {
   Phone,
   Mail,
   MapPin,
-  ChevronRight,
   LogOut,
-  HelpCircle,
   Facebook,
   Youtube,
   Instagram,
@@ -44,10 +43,11 @@ import {
   Snowflake,
   Wrench,
   FlameKindling,
-  Droplets
+  Droplets,
+  Camera
 } from 'lucide-react-native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -56,7 +56,14 @@ export default function ProfilePage() {
   const [isOnDuty, setIsOnDuty] = useState(true);
   const [dailyCheck, setDailyCheck] = useState(true);
   const [avatar, setAvatar] = useState('https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400');
+  const [userName, setUserName] = useState('Rajesh Kumar');
+  const [userBio, setUserBio] = useState('Expert AC technician with 5+ years of experience in repair and maintenance. Providing top-quality service at your doorstep.');
   
+  // --- Edit Profile States ---
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [tempName, setTempName] = useState(userName);
+  const [tempBio, setTempBio] = useState(userBio);
+
   const [gallery, setGallery] = useState([
     'https://picsum.photos/200/200?sig=1',
     'https://picsum.photos/200/200?sig=2',
@@ -83,9 +90,62 @@ export default function ProfilePage() {
     twitter: ''
   });
 
-  // --- Voice Recorder states ---
   const [voiceUri, setVoiceUri] = useState<string | null>('dummy-uri'); 
   const [isRecording, setIsRecording] = useState(false);
+
+  // --- Handlers ---
+  const handleSettingsPress = () => {
+  Alert.alert(
+    "Settings",
+    "Choose an option",
+    [
+      { text: "Privacy Policy", onPress: () => console.log("Privacy Policy") },
+      { text: "About Us", onPress: () => console.log("About Us") },
+      { text: "Help Center", onPress: () => console.log("Help Center") },
+      { text: "Terms & Conditions", onPress: () => console.log("Terms & Conditions") },
+      { 
+        text: "Logout", 
+        style: "destructive", 
+        onPress: handleLogout 
+      },
+      { text: "Cancel", style: "cancel" }
+    ],
+    { cancelable: true }
+  );
+};
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", style: "destructive", onPress: () => router.replace('/login') }
+    ]);
+  };
+
+  const pickProfileImage = async (mode: 'camera' | 'library') => {
+    let result;
+    if (mode === 'camera') {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) return Alert.alert("Permission needed", "Camera access is required.");
+        result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 1 });
+    } else {
+        result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: true, aspect: [1, 1], quality: 1 });
+    }
+    if (!result.canceled) setAvatar(result.assets[0].uri);
+  };
+
+  const handleEditPhotoPress = () => {
+    Alert.alert("Update Profile Photo", "Select Source", [
+        { text: "Take Selfie", onPress: () => pickProfileImage('camera') },
+        { text: "Choose from Gallery", onPress: () => pickProfileImage('library') },
+        { text: "Cancel", style: "cancel" }
+    ]);
+  };
+
+  const saveProfileDetails = () => {
+    setUserName(tempName);
+    setUserBio(tempBio);
+    setIsEditModalVisible(false);
+  };
 
   const handleDeleteVoice = () => {
     Alert.alert("Delete Recording", "Are you sure you want to delete this voice recording?", [
@@ -96,14 +156,12 @@ export default function ProfilePage() {
 
   const handleStartRecording = () => {
     setIsRecording(true);
-    // Simulate recording logic behavior from Home Page
     setTimeout(() => {
         setIsRecording(false);
         setVoiceUri('new-recording-uri');
     }, 3000);
   };
 
-  // --- Handlers ---
   const addGalleryImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -130,71 +188,72 @@ export default function ProfilePage() {
     setSevas(sevas.filter((_, i) => i !== index));
   };
 
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-    if (!result.canceled) setAvatar(result.assets[0].uri);
-  };
-
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", style: "destructive", onPress: () => router.replace('/login') }
-    ]);
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
-          <TouchableOpacity style={styles.iconButton}>
-            <Edit3 size={22} color="#ea580c" />
+          <TouchableOpacity style={styles.iconButton} onPress={handleSettingsPress}>
+              <Text style={styles.settingsEmoji}>⚙️</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Profile Info */}
         <View style={styles.profileSection}>
-          <View style={styles.avatarContainer}>
+          <View style={[styles.avatarContainer, { borderColor: isOnDuty ? '#10b981' : '#ef4444' }]}>
             <Image source={{ uri: avatar }} style={styles.avatar} />
-            <TouchableOpacity style={styles.cameraIcon} onPress={pickImage}>
+            <TouchableOpacity style={styles.cameraIcon} onPress={handleEditPhotoPress}>
               <Plus size={16} color="white" />
             </TouchableOpacity>
           </View>
+          
           <View style={styles.nameRow}>
-            <Text style={styles.userName}>Rajesh Kumar</Text>
+            <Text style={styles.userName}>{userName}</Text>
             <CheckCircle2 size={20} color="#3b82f6" fill="#3b82f6" fillOpacity={0.1} />
           </View>
           <Text style={styles.userRole}>Certified AC Technician</Text>
+          
           <View style={styles.ratingBadge}>
             <Star size={14} color="#f97316" fill="#f97316" />
             <Text style={styles.ratingText}>4.8</Text>
             <Text style={styles.reviewCount}>(120 Reviews)</Text>
           </View>
+
+          <View style={styles.descriptionContainer}>
+              <View style={styles.descriptionHeader}>
+              <Text style={styles.descriptionHeading}>Description</Text>
+          </View>
+
+           <Text style={styles.descriptionText}>{userBio}</Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.editProfileBtn} 
+            onPress={() => {
+                setTempName(userName);
+                setTempBio(userBio);
+                setIsEditModalVisible(true);
+            }}
+          >
+            <Text style={styles.editProfileBtnText}>Edit Profile</Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Duty Switcher */}
         <View style={styles.dutyContainer}>
           <TouchableOpacity 
-            style={[styles.dutyBtn, isOnDuty && styles.dutyBtnActive]} 
+            style={[styles.dutyBtn, isOnDuty && styles.dutyBtnActiveOn]} 
             onPress={() => setIsOnDuty(true)}
           >
             <Text style={[styles.dutyText, isOnDuty && styles.dutyTextActive]}>On Duty</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={[styles.dutyBtn, !isOnDuty && styles.dutyBtnActive]} 
+            style={[styles.dutyBtn, !isOnDuty && styles.dutyBtnActiveOff]} 
             onPress={() => setIsOnDuty(false)}
           >
             <Text style={[styles.dutyText, !isOnDuty && styles.dutyTextActive]}>Off Duty</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Daily Check Toggle */}
         <View style={styles.glassCard}>
           <View style={styles.row}>
             <View style={styles.notificationIconBg}>
@@ -212,7 +271,6 @@ export default function ProfilePage() {
           </View>
         </View>
 
-        {/* Wallet Card */}
         <LinearGradient colors={['#f97316', '#ea580c']} style={styles.walletCard}>
           <View style={styles.walletHeader}>
             <View>
@@ -229,7 +287,6 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </LinearGradient>
 
-        {/* Voice Record Section */}
         <View style={styles.sectionDivider} />
         <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Voice Record</Text>
@@ -267,7 +324,6 @@ export default function ProfilePage() {
           </View>
         )}
 
-        {/* My Sevas Section */}
         <View style={[styles.sectionHeader, { marginTop: 25 }]}>
           <Text style={styles.sectionTitle}>My Sevas</Text>
           <TouchableOpacity onPress={() => setIsAddingSeva(!isAddingSeva)}>
@@ -292,10 +348,7 @@ export default function ProfilePage() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.sevasScroll}>
           {sevas.map((item, index) => (
             <View key={index} style={styles.sevaItem}>
-              <TouchableOpacity 
-                style={styles.deleteSevaIcon} 
-                onPress={() => deleteSeva(index)}
-              >
+              <TouchableOpacity style={styles.deleteSevaIcon} onPress={() => deleteSeva(index)}>
                 <X size={12} color="white" />
               </TouchableOpacity>
               <View style={[styles.sevaIcon, index === 0 && styles.sevaIconActive]}>
@@ -309,7 +362,6 @@ export default function ProfilePage() {
           ))}
         </ScrollView>
 
-        {/* Referral Section (Updated Position) */}
         <View style={styles.referralCard}>
           <View>
             <Text style={styles.cardLabel}>Referral Code</Text>
@@ -321,7 +373,6 @@ export default function ProfilePage() {
           </TouchableOpacity>
         </View>
 
-        {/* Work Gallery Section */}
         <View style={[styles.sectionHeader, { marginTop: 20 }]}>
           <Text style={styles.sectionTitle}>Work Gallery</Text>
           <TouchableOpacity onPress={addGalleryImage}>
@@ -342,7 +393,6 @@ export default function ProfilePage() {
           ))}
         </ScrollView>
 
-        {/* Contact Information */}
         <View style={[styles.sectionHeader, { marginTop: 20, marginBottom: 10 }]}>
             <Text style={styles.sectionTitle}>Contact Information</Text>
             <TouchableOpacity onPress={() => setIsEditingContact(!isEditingContact)}>
@@ -373,12 +423,11 @@ export default function ProfilePage() {
           />
         </View>
 
-        {/* Social Media Links */}
         <View style={[styles.sectionHeader, { marginTop: 25 }]}>
             <Text style={styles.sectionTitle}>Social Media Links</Text>
             <TouchableOpacity onPress={() => setIsEditingSocial(!isEditingSocial)}>
                 <View style={styles.row}>
-                    {isEditingSocial ? <Save size={18} color="#ea580c" /> : <Edit3 size={18} color="#ea580c" />}
+                    {isEditingSocial ? <Save size={18} color="#ea580c" /> : <Settings2 size={18} color="#ea580c" />}
                     <Text style={[styles.editLink, {marginLeft: 5}]}>{isEditingSocial ? "Save" : "Edit"}</Text>
                 </View>
             </TouchableOpacity>
@@ -402,24 +451,67 @@ export default function ProfilePage() {
             </View>
         )}
 
-        {/* Settings */}
-        <Text style={[styles.sectionTitle, { marginHorizontal: 20, marginTop: 30 }]}>Settings</Text>
-        <View style={styles.settingsList}>
-          <SettingsItem icon={<Bell size={20} color="#6b7280" />} label="Notifications" />
-          <SettingsItem icon={<HelpCircle size={20} color="#6b7280" />} label="Help Center" />
-          <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-            <LogOut size={20} color="#ef4444" />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-
       </ScrollView>
+
+      {/* --- EDIT PROFILE MODAL --- */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isEditModalVisible}
+        onRequestClose={() => setIsEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setIsEditModalVisible(false)}>
+                <X size={24} color="#1f2937" />
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={saveProfileDetails}>
+                <Text style={styles.saveActionText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.modalBody}>
+              <View style={styles.modalPhotoContainer}>
+                <Image source={{ uri: avatar }} style={styles.modalAvatar} />
+                <TouchableOpacity style={styles.photoActionBtn} onPress={handleEditPhotoPress}>
+                  <Camera size={18} color="#ea580c" />
+                  <Text style={styles.photoActionLabel}>Change Photo</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Display Name</Text>
+                <TextInput 
+                  style={styles.modalInput}
+                  value={tempName}
+                  onChangeText={setTempName}
+                  placeholder="Enter your name"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Description / Bio</Text>
+                <TextInput 
+                  style={[styles.modalInput, styles.textArea]}
+                  value={tempBio}
+                  onChangeText={setTempBio}
+                  multiline
+                  numberOfLines={4}
+                  placeholder="Describe your services..."
+                />
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
 
 // --- Helper Components ---
-
 const ContactItem = ({ icon, label, value, isEditing, onChange }: { icon: any, label: string, value: string, isEditing: boolean, onChange: (t: string) => void }) => (
   <View style={styles.contactItem}>
     <View style={styles.contactIconBg}>{icon}</View>
@@ -458,56 +550,38 @@ const SocialIcon = ({ color, icon }: { color: string, icon: any }) => (
   </TouchableOpacity>
 );
 
-const SettingsItem = ({ icon, label }: { icon: any, label: string }) => (
-  <TouchableOpacity style={styles.settingsItem}>
-    <View style={styles.row}>
-      {icon}
-      <Text style={styles.settingsLabel}>{label}</Text>
-    </View>
-    <ChevronRight size={18} color="#d1d5db" />
-  </TouchableOpacity>
-);
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fffcf5' },
   scrollContent: { paddingBottom: 100 },
   flex1: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
-  
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-  },
-  headerTitle: { fontSize: 20, fontWeight: '800', color: '#1f2937' },
-  iconButton: { padding: 8, borderRadius: 20, backgroundColor: '#fff7ed' },
-
-  profileSection: { alignItems: 'center', paddingVertical: 20 },
-  avatarContainer: { width: 120, height: 120, borderRadius: 60, padding: 4, backgroundColor: 'white', elevation: 10, shadowColor: '#ea580c', shadowOpacity: 0.2, shadowRadius: 20 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15, alignItems: 'center' },
+  headerTitle: { fontSize: 22, fontWeight: '800', color: '#1f2937' },
+  iconButton: { padding: 8, borderRadius: 12, backgroundColor: '#f3f4f6' },
+  profileSection: { alignItems: 'center', paddingVertical: 10 },
+  avatarContainer: { width: 120, height: 120, borderRadius: 60, padding: 4, backgroundColor: 'white', elevation: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 10, borderWidth: 4 },
   avatar: { width: '100%', height: '100%', borderRadius: 60 },
-  cameraIcon: { position: 'absolute', bottom: 5, right: 5, backgroundColor: '#10b981', padding: 6, borderRadius: 15, borderWidth: 3, borderColor: 'white' },
-  
+  cameraIcon: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#10b981', padding: 6, borderRadius: 15, borderWidth: 3, borderColor: 'white' },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 15 },
   userName: { fontSize: 24, fontWeight: '800', color: '#111827' },
-  userRole: { fontSize: 14, color: '#6b7280', fontWeight: '500', marginTop: 4 },
-  
-  ratingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.7)', paddingHorizontal: 15, paddingVertical: 6, borderRadius: 20, marginTop: 12, borderWidth: 1, borderColor: '#ffedd5' },
+  userRole: { fontSize: 14, color: '#6b7280', fontWeight: '600', marginTop: 2 },
+  ratingBadge: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fff7ed', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, marginTop: 10 },
   ratingText: { fontWeight: '800', marginLeft: 5, color: '#1f2937' },
   reviewCount: { fontSize: 12, color: '#9ca3af', marginLeft: 4 },
-
-  dutyContainer: { flexDirection: 'row', backgroundColor: '#f3f4f6', marginHorizontal: 20, borderRadius: 30, padding: 4, marginTop: 10 },
-  dutyBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 25 },
-  dutyBtnActive: { backgroundColor: 'white', elevation: 2 },
-  dutyText: { fontWeight: '600', color: '#6b7280' },
-  dutyTextActive: { color: '#ea580c', fontWeight: '800' },
-
-  glassCard: { marginHorizontal: 20, marginTop: 20, padding: 15, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.6)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.5)' },
+  descriptionContainer: { paddingHorizontal: 40, marginTop: 15, alignItems: 'center' },
+  descriptionText: { fontSize: 13, color: '#4b5563', textAlign: 'center', lineHeight: 18, fontWeight: '500' },
+  editProfileBtn: { marginTop: 20, width: width * 0.8, backgroundColor: 'white', borderWidth: 1, borderColor: '#d1d5db', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  editProfileBtnText: { fontWeight: '700', color: '#1f2937' },
+  dutyContainer: { flexDirection: 'row', backgroundColor: '#f3f4f6', marginHorizontal: 20, borderRadius: 12, padding: 4, marginTop: 20 },
+  dutyBtn: { flex: 1, paddingVertical: 12, alignItems: 'center', borderRadius: 10 },
+  dutyBtnActiveOn: { backgroundColor: '#10b981', elevation: 2 },
+  dutyBtnActiveOff: { backgroundColor: '#ef4444', elevation: 2 },
+  dutyText: { fontWeight: '700', color: '#6b7280' },
+  dutyTextActive: { color: 'white' },
+  glassCard: { marginHorizontal: 20, marginTop: 20, padding: 15, borderRadius: 20, backgroundColor: 'white', borderWidth: 1, borderColor: '#f3f4f6' },
   notificationIconBg: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#fff7ed', alignItems: 'center', justifyContent: 'center', marginRight: 12 },
   cardTitle: { fontWeight: '800', color: '#111827' },
   cardSub: { fontSize: 12, color: '#9ca3af' },
-
   walletCard: { marginHorizontal: 20, marginTop: 20, borderRadius: 25, padding: 20 },
   walletHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
   walletLabel: { color: '#ffedd5', fontSize: 10, fontWeight: '800', letterSpacing: 1 },
@@ -516,11 +590,9 @@ const styles = StyleSheet.create({
   walletIconBg: { backgroundColor: 'rgba(255,255,255,0.2)', padding: 10, borderRadius: 12 },
   sendBtn: { backgroundColor: 'white', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 12, borderRadius: 15, gap: 8 },
   sendBtnText: { color: '#ea580c', fontWeight: '800' },
-
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, marginTop: 25 },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
   sectionDivider: { height: 1, backgroundColor: '#e5e7eb', marginHorizontal: 20, marginTop: 25 },
-
   audioContainer: { marginHorizontal: 20, marginTop: 15, backgroundColor: '#ecfdf5', borderRadius: 20, padding: 12, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#d1fae5' },
   audioPlayBtn: { backgroundColor: '#10b981', width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   waveform: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 3 },
@@ -532,9 +604,7 @@ const styles = StyleSheet.create({
   addVoiceContainer: { alignItems: 'center', marginTop: 20, gap: 10 },
   addVoiceBtn: { width: 60, height: 60, borderRadius: 30, backgroundColor: 'white', borderStyle: 'dashed', borderWidth: 1, borderColor: '#ea580c', justifyContent: 'center', alignItems: 'center' },
   addVoiceText: { fontSize: 14, color: '#ea580c', fontWeight: '700' },
-  micBtn: { alignSelf: 'center', marginTop: 10, flexDirection: 'row', alignItems: 'center', gap: 5 },
   micText: { color: '#059669', fontSize: 12, fontWeight: '600' },
-
   sevasScroll: { paddingLeft: 20, marginTop: 15 },
   sevaItem: { alignItems: 'center', marginRight: 20, width: 80, position: 'relative' },
   sevaIcon: { width: 65, height: 65, borderRadius: 18, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center', elevation: 2, borderWidth: 1, borderColor: '#f3f4f6' },
@@ -546,34 +616,50 @@ const styles = StyleSheet.create({
   sevaTextInput: { flex: 1, backgroundColor: 'white', borderRadius: 10, padding: 10, borderWidth: 1, borderColor: '#e5e7eb' },
   saveSevaBtn: { marginLeft: 10, backgroundColor: '#ea580c', padding: 10, borderRadius: 10 },
   saveSevaText: { color: 'white', fontWeight: '700' },
-
   referralCard: { marginHorizontal: 20, marginTop: 25, backgroundColor: '#fff7ed', padding: 15, borderRadius: 15, borderStyle: 'dashed', borderWidth: 1, borderColor: '#fed7aa', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardLabel: { fontSize: 12, fontWeight: '800', color: '#1f2937' },
   referralCode: { fontSize: 18, fontWeight: '800', color: '#ea580c', marginVertical: 2 },
   shareButton: { backgroundColor: 'white', padding: 10, borderRadius: 25, elevation: 2 },
-
   galleryScroll: { paddingLeft: 20, marginTop: 15 },
   galleryItem: { marginRight: 12, position: 'relative' },
   galleryImg: { width: 110, height: 110, borderRadius: 15 },
   galleryDelete: { position: 'absolute', top: 5, right: 5, backgroundColor: 'rgba(0,0,0,0.6)', padding: 4, borderRadius: 10 },
-
   contactList: { marginHorizontal: 20, marginTop: 5, gap: 10 },
-  contactItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.5)', padding: 12, borderRadius: 15, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.8)' },
+  contactItem: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', padding: 12, borderRadius: 15, gap: 12, borderWidth: 1, borderColor: '#f3f4f6' },
   contactIconBg: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff7ed', alignItems: 'center', justifyContent: 'center' },
   contactLabel: { fontSize: 9, fontWeight: '800', color: '#9ca3af' },
   contactValue: { fontSize: 13, fontWeight: '700', color: '#1f2937' },
-  contactInput: { fontSize: 13, fontWeight: '700', color: '#1f2937', padding: 0, margin: 0, borderBottomWidth: 1, borderBottomColor: '#ea580c' },
-
+  contactInput: { fontSize: 13, fontWeight: '700', color: '#111827', padding: 0, margin: 0, borderBottomWidth: 1, borderBottomColor: '#ea580c' },
   socialEditContainer: { marginHorizontal: 20, marginTop: 15, gap: 10 },
   socialInputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', borderRadius: 12, padding: 10, borderWidth: 1, borderColor: '#e5e7eb' },
   socialInputIcon: { marginRight: 10, width: 30, alignItems: 'center' },
   socialTextInput: { flex: 1, fontSize: 14, color: '#1f2937' },
   socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 15, marginTop: 20 },
   socialIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-
-  settingsList: { marginHorizontal: 20, marginTop: 10, gap: 10, marginBottom: 40 },
-  settingsItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: 'white', padding: 15, borderRadius: 15 },
-  settingsLabel: { marginLeft: 12, fontWeight: '600', color: '#1f2937' },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#fef2f2', padding: 15, borderRadius: 15, marginTop: 5 },
-  logoutText: { marginLeft: 12, fontWeight: '700', color: '#ef4444' },
-});
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+  modalContainer: { backgroundColor: 'white', height: height * 0.8, borderTopLeftRadius: 30, borderTopRightRadius: 30 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  modalTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
+  saveActionText: { color: '#ea580c', fontWeight: '800', fontSize: 16 },
+  modalBody: { padding: 20 },
+  modalPhotoContainer: { alignItems: 'center', marginVertical: 20 },
+  modalAvatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 15 },
+  photoActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff7ed', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
+  photoActionLabel: { color: '#ea580c', fontWeight: '700' },
+  inputGroup: { marginBottom: 20 },
+  inputLabel: { fontSize: 14, fontWeight: '700', color: '#374151', marginBottom: 8 },
+  modalInput: { backgroundColor: '#f9fafb', borderRadius: 12, padding: 15, fontSize: 16, color: '#111827', borderWidth: 1, borderColor: '#e5e7eb' },
+  textArea: { height: 100, textAlignVertical: 'top' },
+  descriptionHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: 6,
+  marginBottom: 6,
+},
+descriptionHeading: {
+  fontSize: 14,
+  fontWeight: '800',
+  color: '#111827',
+},settingsEmoji: {
+  fontSize: 20,
+},});
