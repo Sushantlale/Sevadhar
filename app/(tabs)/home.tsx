@@ -17,6 +17,7 @@ import {
 import React, { useRef, useState } from 'react';
 import { Dimensions, Image, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
+
 const { width } = Dimensions.get('window');
 
 const HomePage = () => {
@@ -921,9 +922,9 @@ const styles = StyleSheet.create({
   voiceResultText: { fontSize: 22, fontWeight: 'bold', color: '#333', textAlign: 'center' },
   voiceActionRow: { flexDirection: 'row', gap: 15, width: '100%' },
   voiceTryAgain: { flex: 1, height: 50, borderRadius: 12, borderWidth: 1, borderColor: '#FF7A00', justifyContent: 'center', alignItems: 'center' },
-  tryAgainText: { color: '#FF7A00', fontWeight: 'bold' },
   voiceSearchBtn: { flex: 1, height: 50, borderRadius: 12, backgroundColor: '#FF7A00', justifyContent: 'center', alignItems: 'center' },
   searchBtnText: { color: '#FFF', fontWeight: 'bold' },
+  tryAgainText: { color: '#FF7A00', fontWeight: 'bold' },
 
   suggestionBox: {
   backgroundColor: '#FFF',

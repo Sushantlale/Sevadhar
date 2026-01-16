@@ -28,6 +28,7 @@ import {
   X
 } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
+
 import {
   Dimensions,
   Image,
@@ -520,6 +521,7 @@ export default function ServicesPage() {
   // Voice Search Modal States
   const [voiceModalVisible, setVoiceModalVisible] = useState(false); 
   const [voiceStep, setVoiceStep] = useState<'listening' | 'result'>('listening');
+  
 
   // Handle Voice Search Trigger
   const handleVoiceTrigger = () => {
