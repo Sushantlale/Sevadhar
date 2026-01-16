@@ -15,7 +15,7 @@ import {
   X
 } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
-import { Dimensions, Image, Modal, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Modal, Platform, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 
 const { width } = Dimensions.get('window');
@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFF8F0' },
   etherealBg: { ...StyleSheet.absoluteFillObject, backgroundColor: '#FFF8F0' },
   safeArea: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 15, backgroundColor: 'transparent' },
+  header: { paddingHorizontal: 20, paddingTop: Platform.OS === 'web' ? 10 : 30, paddingBottom: 10, backgroundColor: 'transparent' },
   headerTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 },
   headerLeft: { flex: 1 },
   locLabel: { fontSize: 10, color: '#6B7280' },
