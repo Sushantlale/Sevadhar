@@ -3,42 +3,130 @@ import { Audio } from 'expo-av';
 import * as Linking from 'expo-linking';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    ArrowLeft,
-    BadgeCheck,
-    ChevronDown,
-    Heart,
-    Mic,
-    Phone,
-    Play,
-    Search,
-    SlidersHorizontal,
-    Star
+  ArrowLeft,
+  BadgeCheck,
+  ChevronDown,
+  Heart,
+  Mic,
+  Phone,
+  Play,
+  Search,
+  SlidersHorizontal,
+  Star
 } from 'lucide-react-native';
 import React, { useMemo, useState } from 'react';
 import {
-    Dimensions,
-    FlatList,
-    Image,
-    Platform,
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Dimensions,
+  FlatList,
+  Image,
+  Platform,
+  SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
-// Mock workers data with added profile image support and availability
 const mockWorkers = [
-    { id: 1, name: 'John Doe', location: 'Downtown & SoMa', rating: 4.9, reviews: 85, jobsCompleted: 120, isVerified: true, isAvailable: true, image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200', voiceTime: '0:15' },
-    { id: 2, name: 'Sarah Jenkins', location: 'Sunset District', rating: 4.8, reviews: 142, jobsCompleted: 203, isVerified: true, isAvailable: true, image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200', voiceTime: '0:12' },
-    { id: 3, name: 'Michael Chen', location: 'North Beach', rating: 4.5, reviews: 28, jobsCompleted: 45, isVerified: false, isAvailable: false, image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200', voiceTime: '0:20' },
-    { id: 4, name: 'Lakshmi Devi', location: 'Dadar, Mumbai', rating: 4.9, reviews: 45, jobsCompleted: 456, isVerified: true, isAvailable: true, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200', voiceTime: '0:18' },
-];
+    // --- GROUP: household (Home Help) ---
+    { 
+        id: 1, name: 'Sanjay Pawar', category: 'aquarium-cleaner', categoryGroup: 'cleaning', location: 'Khopoli Market', 
+        rating: 4.9, reviews: 42, jobsCompleted: 156, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1540569014015-19a7ee504e3a?w=400', voiceTime: '0:15' 
+    },
+    { 
+        id: 2, name: 'Sunita Deshmukh', category: 'home-cleaning', categoryGroup: 'cleaning', location: 'Khalapur Road', 
+        rating: 4.8, reviews: 120, jobsCompleted: 430, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?w=400', voiceTime: '0:12' 
+    },
+    { 
+        id: 14, name: 'Pooja Shinde', category: 'maid', categoryGroup: 'cleaning', location: 'Shastri Nagar', 
+        rating: 4.7, reviews: 95, jobsCompleted: 310, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=400', voiceTime: '0:10' 
+    },
+    { 
+        id: 15, name: 'Anita Vaze', category: 'home-cleaning', categoryGroup: 'cleaning', location: 'Lowjee Area', 
+        rating: 4.6, reviews: 50, jobsCompleted: 112, isVerified: false, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1557053910-d9eadeed1c58?w=400', voiceTime: '0:14' 
+    },
 
+    // --- GROUP: repair (Repairs) ---
+    { 
+        id: 4, name: 'Arjun Sharma', category: 'ac-repair', categoryGroup: 'repair', location: 'Khopoli Station', 
+        rating: 4.9, reviews: 85, jobsCompleted: 210, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=400', voiceTime: '0:20' 
+    },
+    { 
+        id: 6, name: 'Amit Kadam', category: 'plumber', categoryGroup: 'repair', location: 'Shastri Nagar', 
+        rating: 4.5, reviews: 22, jobsCompleted: 65, isVerified: false, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400', voiceTime: '0:14' 
+    },
+    { 
+        id: 16, name: 'Rahul More', category: 'electrician', categoryGroup: 'repair', location: 'Pen Road', 
+        rating: 4.8, reviews: 67, jobsCompleted: 180, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=400', voiceTime: '0:18' 
+    },
+    { 
+        id: 17, name: 'Vikash Gupta', category: 'ac-repair', categoryGroup: 'repair', location: 'Market Yard', 
+        rating: 4.7, reviews: 45, jobsCompleted: 98, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=400', voiceTime: '0:15' 
+    },
+
+    // --- GROUP: construction (Construction) ---
+    { 
+        id: 7, name: 'Dinesh Bhoir', category: 'labor', categoryGroup: 'construction', location: 'Khalapur Naka', 
+        rating: 4.4, reviews: 15, jobsCompleted: 120, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400', voiceTime: '0:08' 
+    },
+    { 
+        id: 18, name: 'Balu Gaware', category: 'welder', categoryGroup: 'construction', location: 'Industrial Area', 
+        rating: 4.9, reviews: 30, jobsCompleted: 85, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=400', voiceTime: '0:11' 
+    },
+    { 
+        id: 19, name: 'Sandeep Patil', category: 'tiles-worker', categoryGroup: 'construction', location: 'Tata Colony', 
+        rating: 4.6, reviews: 12, jobsCompleted: 40, isVerified: false, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=400', voiceTime: '0:09' 
+    },
+
+    // --- GROUP: restaurants (Food) ---
+    { 
+        id: 20, name: 'Hotel Visawa', category: 'restaurant', categoryGroup: 'restaurants', location: 'Highway Junction', 
+        rating: 4.5, reviews: 850, jobsCompleted: 0, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400', voiceTime: '0:00' 
+    },
+    { 
+        id: 21, name: 'Annapurna Tiffin', category: 'tiffin', categoryGroup: 'restaurants', location: 'Khopoli Market', 
+        rating: 4.9, reviews: 120, jobsCompleted: 500, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1613292443284-8d10ef9383fe?w=400', voiceTime: '0:10' 
+    },
+    { 
+        id: 22, name: 'Sagar Fast Food', category: 'fast-food', categoryGroup: 'restaurants', location: 'Station Road', 
+        rating: 4.2, reviews: 400, jobsCompleted: 0, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1561758033-d89a9ad46330?w=400', voiceTime: '0:00' 
+    },
+
+    // --- GROUP: professional (Professional Services) ---
+    { 
+        id: 9, name: 'Dr. Anjali Mehta', category: 'doctor', categoryGroup: 'professional', location: 'Municipal Hospital', 
+        rating: 4.9, reviews: 350, jobsCompleted: 1200, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1559839734-2b71f1536783?w=400', voiceTime: '0:30' 
+    },
+    { 
+        id: 23, name: 'Adv. K. R. Deshmukh', category: 'lawyer', categoryGroup: 'professional', location: 'Tehsil Court', 
+        rating: 4.8, reviews: 78, jobsCompleted: 150, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400', voiceTime: '0:22' 
+    },
+    { 
+        id: 24, name: 'Amit Saxena', category: 'accountant', categoryGroup: 'professional', location: 'MG Road', 
+        rating: 4.7, reviews: 32, jobsCompleted: 60, isVerified: true, isAvailable: true, 
+        image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400', voiceTime: '0:12' 
+    }
+];
 
 export default function ServiceListingPage() {
     const { id } = useLocalSearchParams();
@@ -159,17 +247,21 @@ const startRecording = async () => {
     };
 
     // Filter Logic
-    const filteredWorkers = useMemo(() => {
-        return mockWorkers.filter(worker => {
-            const matchesSearch = worker.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                 worker.location.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesVerified = !filterVerified || worker.isVerified;
-            const matchesTopRated = !filterTopRated || worker.rating >= 4.8;
-            const matchesAvailable = !filterAvailable || worker.isAvailable;
-            
-            return matchesSearch && matchesVerified && matchesTopRated && matchesAvailable;
-        });
-    }, [searchQuery, filterVerified, filterTopRated, filterAvailable]);
+    // Inside your ServiceListingPage function in [id].tsx
+const filteredWorkers = useMemo(() => {
+    return mockWorkers.filter(worker => {
+        // 1. Only show workers that belong to the current category (id)
+        const matchesCategory = worker.category === id; 
+        
+        // 2. Rest of your existing search logic
+        const matchesSearch = worker.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesVerified = !filterVerified || worker.isVerified;
+        const matchesTopRated = !filterTopRated || worker.rating >= 4.8;
+        const matchesAvailable = !filterAvailable || worker.isAvailable;
+        
+        return matchesCategory && matchesSearch && matchesVerified && matchesTopRated && matchesAvailable;
+    });
+}, [id, searchQuery, filterVerified, filterTopRated, filterAvailable]);
 
     const renderWorker = ({ item }: { item: typeof mockWorkers[0] }) => (
         <View style={styles.workerCard}>
