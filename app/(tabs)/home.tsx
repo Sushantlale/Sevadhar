@@ -804,7 +804,7 @@ const styles = StyleSheet.create({
   locLabel: { fontSize: 10, color: '#6B7280' },
   locNameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   locName: { fontSize: 14, fontWeight: 'bold', color: '#FF9100' },
-  brandTitle: { fontSize: 20, fontWeight: 'bold', color: '#FF9100', letterSpacing: 0.5, flex: 1, textAlign: 'center' },
+  brandTitle: { fontSize: 20, fontWeight: 'bold', color: '#FF9100', letterSpacing: 0.5, flex: 1, textAlign: 'center',paddingRight: 40 },
   langBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFF' },
   langText: { fontSize: 12, fontWeight: '600' },
   searchBarContainer: { paddingVertical: 5 },
