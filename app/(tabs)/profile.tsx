@@ -12,6 +12,8 @@ import {
   Alert,
   TextInput,
   Modal,
+  StatusBar,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -32,7 +34,6 @@ import {
   Phone,
   Mail,
   MapPin,
-  LogOut,
   Facebook,
   Youtube,
   Instagram,
@@ -44,7 +45,9 @@ import {
   Wrench,
   FlameKindling,
   Droplets,
-  Camera
+  Camera,
+  LogOut, // Import name remains LogOut to match library export
+  ChevronRight
 } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
@@ -59,6 +62,9 @@ export default function ProfilePage() {
   const [userName, setUserName] = useState('Rajesh Kumar');
   const [userBio, setUserBio] = useState('Expert AC technician with 5+ years of experience in repair and maintenance. Providing top-quality service at your doorstep.');
   
+  // --- Settings Modal State ---
+  const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+
   // --- Edit Profile States ---
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [tempName, setTempName] = useState(userName);
@@ -95,26 +101,11 @@ export default function ProfilePage() {
 
   // --- Handlers ---
   const handleSettingsPress = () => {
-  Alert.alert(
-    "Settings",
-    "Choose an option",
-    [
-      { text: "Privacy Policy", onPress: () => console.log("Privacy Policy") },
-      { text: "About Us", onPress: () => console.log("About Us") },
-      { text: "Help Center", onPress: () => console.log("Help Center") },
-      { text: "Terms & Conditions", onPress: () => console.log("Terms & Conditions") },
-      { 
-        text: "Logout", 
-        style: "destructive", 
-        onPress: handleLogout 
-      },
-      { text: "Cancel", style: "cancel" }
-    ],
-    { cancelable: true }
-  );
-};
+    setIsSettingsModalVisible(true);
+  };
 
   const handleLogout = () => {
+    setIsSettingsModalVisible(false);
     Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel", style: "cancel" },
       { text: "Logout", style: "destructive", onPress: () => router.replace('/login') }
@@ -190,6 +181,7 @@ export default function ProfilePage() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         
         <View style={styles.header}>
@@ -220,11 +212,10 @@ export default function ProfilePage() {
           </View>
 
           <View style={styles.descriptionContainer}>
-              <View style={styles.descriptionHeader}>
+            <View style={styles.descriptionHeader}>
               <Text style={styles.descriptionHeading}>Description</Text>
-          </View>
-
-           <Text style={styles.descriptionText}>{userBio}</Text>
+            </View>
+            <Text style={styles.descriptionText}>{userBio}</Text>
           </View>
 
           <TouchableOpacity 
@@ -337,7 +328,7 @@ export default function ProfilePage() {
                     style={styles.sevaTextInput}
                     placeholder="Enter seva detail..."
                     value={newSeva}
-                    onChangeText={(text: string) => setNewSeva(text)}
+                    onChangeText={(text) => setNewSeva(text)}
                 />
                 <TouchableOpacity style={styles.saveSevaBtn} onPress={handleAddSeva}>
                     <Text style={styles.saveSevaText}>Save</Text>
@@ -435,11 +426,11 @@ export default function ProfilePage() {
 
         {isEditingSocial ? (
             <View style={styles.socialEditContainer}>
-                <SocialInput icon={<Facebook size={20} color="#1877F2" />} value={socialLinks.facebook} onChange={(t: string) => setSocialLinks({...socialLinks, facebook: t})} placeholder="Facebook Link" />
-                <SocialInput icon={<Instagram size={20} color="#E4405F" />} value={socialLinks.instagram} onChange={(t: string) => setSocialLinks({...socialLinks, instagram: t})} placeholder="Instagram Link" />
-                <SocialInput icon={<Twitter size={20} color="black" />} value={socialLinks.twitter} onChange={(t: string) => setSocialLinks({...socialLinks, twitter: t})} placeholder="Twitter Link" />
-                <SocialInput icon={<Linkedin size={20} color="#0A66C2" />} value={socialLinks.linkedin} onChange={(t: string) => setSocialLinks({...socialLinks, linkedin: t})} placeholder="LinkedIn Link" />
-                <SocialInput icon={<Youtube size={22} color="#FF0000" fill="#FF0000" />} value={socialLinks.youtube} onChange={(t: string) => setSocialLinks({...socialLinks, youtube: t})} placeholder="YouTube Link" />
+                <SocialInput icon={<Facebook size={20} color="#1877F2" />} value={socialLinks.facebook} onChange={(t) => setSocialLinks({...socialLinks, facebook: t})} placeholder="Facebook Link" />
+                <SocialInput icon={<Instagram size={20} color="#E4405F" />} value={socialLinks.instagram} onChange={(t) => setSocialLinks({...socialLinks, instagram: t})} placeholder="Instagram Link" />
+                <SocialInput icon={<Twitter size={20} color="black" />} value={socialLinks.twitter} onChange={(t) => setSocialLinks({...socialLinks, twitter: t})} placeholder="Twitter Link" />
+                <SocialInput icon={<Linkedin size={20} color="#0A66C2" />} value={socialLinks.linkedin} onChange={(t) => setSocialLinks({...socialLinks, linkedin: t})} placeholder="LinkedIn Link" />
+                <SocialInput icon={<Youtube size={22} color="#FF0000" fill="#FF0000" />} value={socialLinks.youtube} onChange={(t) => setSocialLinks({...socialLinks, youtube: t})} placeholder="YouTube Link" />
             </View>
         ) : (
             <View style={styles.socialRow}>
@@ -452,6 +443,53 @@ export default function ProfilePage() {
         )}
 
       </ScrollView>
+
+      {/* --- SETTINGS MODAL --- */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isSettingsModalVisible}
+        onRequestClose={() => setIsSettingsModalVisible(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setIsSettingsModalVisible(false)}
+        >
+          <View style={styles.settingsModalContainer}>
+            <Text style={styles.settingsModalTitle}>Settings</Text>
+            
+            {/* <TouchableOpacity style={styles.settingsOption} onPress={() => { setIsSettingsModalVisible(false); router.push('/settings/help'); }}>
+              <Text style={styles.settingsOptionText}>Help Center</Text>
+              <ChevronRight size={18} color="#9ca3af" />
+            </TouchableOpacity> */}
+
+            <TouchableOpacity style={styles.settingsOption} onPress={() => { setIsSettingsModalVisible(false); router.push('/settings/contact'); }}>
+              <Text style={styles.settingsOptionText}>Contact Us</Text>
+              <ChevronRight size={18} color="#9ca3af" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingsOption} onPress={() => { setIsSettingsModalVisible(false); router.push('/settings/about'); }}>
+              <Text style={styles.settingsOptionText}>About Us</Text>
+              <ChevronRight size={18} color="#9ca3af" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingsOption} onPress={() => { setIsSettingsModalVisible(false); router.push('/settings/privacy'); }}>
+              <Text style={styles.settingsOptionText}>Privacy Policy</Text>
+              <ChevronRight size={18} color="#9ca3af" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingsOption} onPress={handleLogout}>
+              <Text style={[styles.settingsOptionText, { color: '#ef4444' }]}>Logout</Text>
+              <LogOut size={18} color="#ef4444" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.settingsCloseBtn} onPress={() => setIsSettingsModalVisible(false)}>
+              <Text style={styles.settingsCloseText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* --- EDIT PROFILE MODAL --- */}
       <Modal
@@ -555,7 +593,7 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 100 },
   flex1: { flex: 1 },
   row: { flexDirection: 'row', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15, alignItems: 'center' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 15, alignItems: 'center', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight! + 10 : 15 },
   headerTitle: { fontSize: 22, fontWeight: '800', color: '#1f2937' },
   iconButton: { padding: 8, borderRadius: 12, backgroundColor: '#f3f4f6' },
   profileSection: { alignItems: 'center', paddingVertical: 10 },
@@ -636,30 +674,29 @@ const styles = StyleSheet.create({
   socialTextInput: { flex: 1, fontSize: 14, color: '#1f2937' },
   socialRow: { flexDirection: 'row', justifyContent: 'center', gap: 15, marginTop: 20 },
   socialIcon: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalContainer: { backgroundColor: 'white', height: height * 0.8, borderTopLeftRadius: 30, borderTopRightRadius: 30 },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
-  modalTitle: { fontSize: 18, fontWeight: '800', color: '#111827' },
-  saveActionText: { color: '#ea580c', fontWeight: '800', fontSize: 16 },
-  modalBody: { padding: 20 },
+  
+  settingsModalContainer: { width: '85%', backgroundColor: 'white', borderRadius: 25, padding: 20, alignItems: 'center', elevation: 15, shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 15 },
+  settingsModalTitle: { fontSize: 22, fontWeight: '900', color: '#111827', marginBottom: 20, letterSpacing: 0.5 },
+  settingsOption: { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 18, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', alignItems: 'center' },
+  settingsOptionText: { fontSize: 16, fontWeight: '700', color: '#4b5563' },
+  settingsCloseBtn: { marginTop: 15, padding: 10 },
+  settingsCloseText: { color: '#ea580c', fontWeight: '800', fontSize: 16 },
+
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { backgroundColor: 'white', height: height * 0.8, width: '100%', position: 'absolute', bottom: 0, borderTopLeftRadius: 35, borderTopRightRadius: 35 },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 25, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  modalTitle: { fontSize: 20, fontWeight: '900', color: '#111827' },
+  saveActionText: { color: '#ea580c', fontWeight: '900', fontSize: 17 },
+  modalBody: { padding: 25 },
   modalPhotoContainer: { alignItems: 'center', marginVertical: 20 },
-  modalAvatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 15 },
-  photoActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff7ed', paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20 },
-  photoActionLabel: { color: '#ea580c', fontWeight: '700' },
-  inputGroup: { marginBottom: 20 },
-  inputLabel: { fontSize: 14, fontWeight: '700', color: '#374151', marginBottom: 8 },
-  modalInput: { backgroundColor: '#f9fafb', borderRadius: 12, padding: 15, fontSize: 16, color: '#111827', borderWidth: 1, borderColor: '#e5e7eb' },
-  textArea: { height: 100, textAlignVertical: 'top' },
-  descriptionHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 6,
-  marginBottom: 6,
-},
-descriptionHeading: {
-  fontSize: 14,
-  fontWeight: '800',
-  color: '#111827',
-},settingsEmoji: {
-  fontSize: 20,
-},});
+  modalAvatar: { width: 110, height: 110, borderRadius: 55, marginBottom: 15 },
+  photoActionBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fff7ed', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 25 },
+  photoActionLabel: { color: '#ea580c', fontWeight: '800' },
+  inputGroup: { marginBottom: 25 },
+  inputLabel: { fontSize: 15, fontWeight: '800', color: '#374151', marginBottom: 10 },
+  modalInput: { backgroundColor: '#f9fafb', borderRadius: 15, padding: 18, fontSize: 16, color: '#111827', borderWidth: 1, borderColor: '#e5e7eb' },
+  textArea: { height: 120, textAlignVertical: 'top' },
+  descriptionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+  descriptionHeading: { fontSize: 14, fontWeight: '800', color: '#111827' },
+  settingsEmoji: { fontSize: 22 },
+});

@@ -6,81 +6,51 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
   Dimensions,
   TextInput,
   StatusBar,
   ImageBackground,
+  Modal,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
-
+import { LinearGradient } from 'expo-linear-gradient';
 import { 
   Search, 
   Star, 
   Heart, 
   Calendar, 
   Clock, 
-  ChevronRight
+  ChevronRight, 
+  Mic, 
+  X, 
+  MessageCircle, 
+  Trash2,
+  CheckCircle2
 } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
+const headerImage = require('../../assets/images/History.png');
 
 const initialHistory = [
-  { 
-    id: '1', 
-    name: 'Ramesh Electrician', 
-    service: 'General Electrical Work', 
-    rating: 4.5, 
-    date: '22 Dec', 
-    time: '03:20 PM', 
-    image: 'https://randomuser.me/api/portraits/men/21.jpg',
-    status: 'completed',
-    isFavorite: false,
-    month: 'DECEMBER 2024'
-  },
-  { 
-    id: '2', 
-    name: 'Suresh Plumber', 
-    service: 'Leakage Fix & Piping', 
-    rating: 5.0, 
-    date: '20 Dec', 
-    time: '07:15 PM', 
-    image: 'https://randomuser.me/api/portraits/men/22.jpg',
-    status: 'completed',
-    isFavorite: true,
-    month: 'DECEMBER 2024'
-  },
-  { 
-    id: '3', 
-    name: 'Kumar AC Repair', 
-    service: 'AC Maintenance', 
-    rating: 4.0, 
-    date: '18 Dec', 
-    time: '04:50 PM', 
-    image: 'https://randomuser.me/api/portraits/men/23.jpg',
-    status: 'completed',
-    isFavorite: false,
-    month: 'DECEMBER 2024'
-  },
-  { 
-    id: '4', 
-    name: 'John Painter', 
-    service: 'Interior Painting', 
-    rating: null, 
-    date: '12 Nov', 
-    time: '10:00 AM', 
-    image: 'https://randomuser.me/api/portraits/men/24.jpg',
-    status: 'cancelled',
-    isFavorite: false,
-    month: 'NOVEMBER 2024'
-  },
+  { id: '1', name: 'Ramesh Electrician', service: 'General Electrical Work', rating: 4.5, reviews: 12, date: '22 Dec', time: '03:20 PM', image: 'https://randomuser.me/api/portraits/men/21.jpg', status: 'completed', isFavorite: false, month: 'DECEMBER 2024' },
+  { id: '2', name: 'Suresh Plumber', service: 'Leakage Fix & Piping', rating: 5.0, reviews: 45, date: '20 Dec', time: '07:15 PM', image: 'https://randomuser.me/api/portraits/men/22.jpg', status: 'completed', isFavorite: true, month: 'DECEMBER 2024' },
+  { id: '3', name: 'Kumar AC Repair', service: 'AC Maintenance', rating: 4.0, reviews: 8, date: '18 Dec', time: '04:50 PM', image: 'https://randomuser.me/api/portraits/men/23.jpg', status: 'completed', isFavorite: false, month: 'DECEMBER 2024' },
+  { id: '4', name: 'John Painter', service: 'Interior Painting', rating: 3.8, reviews: 15, date: '12 Nov', time: '10:00 AM', image: 'https://randomuser.me/api/portraits/men/24.jpg', status: 'cancelled', isFavorite: false, month: 'NOVEMBER 2024' },
+  { id: '5', name: 'Amit Carpenter', service: 'Furniture Repair', rating: 4.2, reviews: 20, date: '05 Nov', time: '11:00 AM', image: 'https://randomuser.me/api/portraits/men/25.jpg', status: 'completed', isFavorite: true, month: 'NOVEMBER 2024' },
+  { id: '6', name: 'Sita Cleaning', service: 'Full House Deep Clean', rating: 4.9, reviews: 110, date: '28 Oct', time: '09:00 AM', image: 'https://randomuser.me/api/portraits/women/26.jpg', status: 'completed', isFavorite: false, month: 'OCTOBER 2024' },
 ];
 
 export default function HistoryPage() {
   const [history, setHistory] = useState(initialHistory);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeRange, setActiveRange] = useState('1M');
-
-  const ranges = ['1D', '1W', '1M', '3M', '6M'];
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  
+  /** VOICE SEARCH STATES */
+  const [voiceModal, setVoiceModal] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [voiceResult, setVoiceResult] = useState<string | null>(null);
 
   const toggleFavorite = (id: string) => {
     setHistory(history.map(item => 
@@ -88,214 +58,220 @@ export default function HistoryPage() {
     ));
   };
 
+  const toggleSelection = (id: string) => {
+    if (selectedItems.includes(id)) {
+      setSelectedItems(selectedItems.filter(itemId => itemId !== id));
+    } else {
+      setSelectedItems([...selectedItems, id]);
+    }
+  };
+
+  const deleteSelected = () => {
+    setHistory(history.filter(item => !selectedItems.includes(item.id)));
+    setSelectedItems([]);
+    setIsDeleteMode(false);
+  };
+
   const filteredHistory = history.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.service.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const startMockListening = () => {
+    setListening(true);
+    setVoiceResult(null);
+    setTimeout(() => {
+      setListening(false);
+      setVoiceResult('Electrician');
+    }, 1500);
+  };
+
   return (
-    <View style={styles.outerContainer}>
-      <StatusBar barStyle="dark-content" />
-      
-      {/* 1. Improved Background Header: Added background color and adjusted resizeMode */}
-      <View style={styles.headerImageContainer}>
-        <ImageBackground 
-            source={require('../../assets/images/History.png')} 
-            style={styles.backgroundImage}
-            resizeMode="contain" // Zooms out to fit the full image
-        >
-            <SafeAreaView style={styles.headerSpacer} />
-        </ImageBackground>
-      </View>
-
-      <View style={styles.contentArea}>
-        <View style={styles.dragIndicator} />
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <View style={styles.outerContainer}>
+        <StatusBar barStyle="dark-content" />
         
-
-        {/* Search container with improved padding */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Search size={18} color="#9CA3AF" />
-            <TextInput
-              placeholder="Search past services..."
-              placeholderTextColor="#9CA3AF"
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{flexGrow: 1}}>
+          {/* BACKGROUND HEADER - Image now scrolls with content */}
+          <View style={styles.headerWrapper}>
+            <ImageBackground source={headerImage} style={styles.backgroundImage} resizeMode="cover">
+              <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,243,230,0.8)']} style={StyleSheet.absoluteFillObject} />
+            </ImageBackground>
           </View>
-        </View>
 
-        <View style={styles.tabsWrapper}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsScroll}>
-            {ranges.map(range => (
-              <TouchableOpacity 
-                key={range} 
-                onPress={() => setActiveRange(range)}
-                style={[styles.rangeTab, activeRange === range && styles.activeRangeTab]}
-              >
-                <Text style={[styles.rangeText, activeRange === range && styles.activeRangeText]}>{range}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
+          <View style={styles.contentArea}>
+            <View style={styles.dragIndicator} />
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
-          {filteredHistory.map((item, index) => {
-             const showMonth = index === 0 || item.month !== filteredHistory[index - 1].month;
-             return (
-               <View key={item.id}>
-                 {showMonth && <Text style={styles.monthHeader}>{item.month}</Text>}
-                 <View style={styles.card}>
-                   <View style={styles.cardMain}>
-                    <View style={styles.avatarWrapper}>
-                      <Image 
-                        source={{ uri: item.image }} 
-                        style={[styles.avatar, item.status === 'cancelled' && styles.grayscale]} 
-                      />
-                      <View style={[styles.onlineDot, { backgroundColor: item.status === 'cancelled' ? '#EF4444' : '#22C55E' }]} />
-                    </View>
-                    <View style={styles.cardDetails}>
-                      <View style={styles.nameRow}>
-                        <View style={styles.flex1}>
-                          <Text style={styles.workerName} numberOfLines={1}>{item.name}</Text>
-                          <Text style={[styles.serviceName, item.status === 'cancelled' && styles.textGray]}>{item.service}</Text>
-                        </View>
-                        {item.rating && (
-                          <View style={styles.ratingBadge}>
-                            <Star size={12} color="#D97706" fill="#D97706" />
-                            <Text style={styles.ratingText}>{item.rating}</Text>
-                          </View>
+            {/* SEARCH BAR */}
+            <View style={styles.searchContainer}>
+              <View style={styles.searchBar}>
+                <Search size={18} color="#94a3b8" />
+                <TextInput
+                  placeholder="Search past services..."
+                  style={styles.searchInput}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                />
+                <TouchableOpacity onPress={() => setVoiceModal(true)}>
+                  <Mic size={20} color="#f97316" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* DELETE ACTION BAR */}
+            <View style={styles.actionHeader}>
+                <TouchableOpacity onPress={() => setIsDeleteMode(!isDeleteMode)}>
+                    <Text style={styles.actionHeaderText}>{isDeleteMode ? "Cancel" : "Select to Delete"}</Text>
+                </TouchableOpacity>
+                {isDeleteMode && selectedItems.length > 0 && (
+                    <TouchableOpacity onPress={deleteSelected} style={styles.deleteBtn}>
+                        <Trash2 size={18} color="#EF4444" />
+                        <Text style={styles.deleteBtnText}>Delete ({selectedItems.length})</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
+
+            <View style={styles.listContainer}>
+              {filteredHistory.map((item, index) => {
+                const showMonth = index === 0 || item.month !== filteredHistory[index - 1].month;
+                const isSelected = selectedItems.includes(item.id);
+
+                return (
+                  <View key={item.id}>
+                    {showMonth && <Text style={styles.monthHeader}>{item.month}</Text>}
+                    
+                    <TouchableOpacity 
+                        activeOpacity={0.9}
+                        onPress={() => isDeleteMode ? toggleSelection(item.id) : null}
+                        style={[styles.card, isSelected && styles.selectedCard]}
+                    >
+                      <View style={styles.cardMain}>
+                        {/* SELECT CIRCLE FOR DELETE MODE */}
+                        {isDeleteMode && (
+                            <View style={styles.selectionCircle}>
+                                {isSelected ? <CheckCircle2 size={24} color="#f97316" fill="#fff"/> : <View style={styles.unselectedCircle} />}
+                            </View>
                         )}
+
+                        <Image source={{ uri: item.image }} style={styles.avatar} />
+                        
+                        <View style={styles.cardDetails}>
+                          <View style={styles.nameRow}>
+                            <View style={{ flex: 1 }}>
+                              <Text style={styles.workerName}>{item.name}</Text>
+                              <Text style={styles.serviceName}>{item.service}</Text>
+                            </View>
+                            {/* HEART ICON RESTORED */}
+                            <TouchableOpacity onPress={() => toggleFavorite(item.id)}>
+                              <Heart size={20} color={item.isFavorite ? "#EF4444" : "#D1D5DB"} fill={item.isFavorite ? "#EF4444" : "none"} />
+                            </TouchableOpacity>
+                          </View>
+
+                          <View style={styles.metaRow}>
+                            {/* RATING RESTORED */}
+                            <View style={styles.ratingBox}>
+                                <Star size={14} color="#facc15" fill="#facc15" />
+                                <Text style={styles.ratingText}>{item.rating} ({item.reviews})</Text>
+                            </View>
+                            <View style={styles.metaItem}><Calendar size={12} color="#6B7280" /><Text style={styles.metaText}>{item.date}</Text></View>
+                            <View style={styles.metaItem}><Clock size={12} color="#6B7280" /><Text style={styles.metaText}>{item.time}</Text></View>
+                          </View>
+                        </View>
                       </View>
-                      <View style={styles.metaRow}>
-                        <View style={styles.metaItem}><Calendar size={12} color="#6B7280" /><Text style={styles.metaText}>{item.date}</Text></View>
-                        <View style={styles.metaItem}><Clock size={12} color="#6B7280" /><Text style={styles.metaText}>{item.time}</Text></View>
+                      
+                      <View style={styles.cardFooter}>
+                        <TouchableOpacity style={styles.rebookBtn}>
+                          <Text style={styles.rebookBtnText}>Rebook Service</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.reviewBtn}>
+                          <MessageCircle size={16} color="#f97316" />
+                          <Text style={styles.reviewBtnText}>Review</Text>
+                        </TouchableOpacity>
                       </View>
-                    </View>
-                    <TouchableOpacity onPress={() => toggleFavorite(item.id)} style={styles.favBtn}>
-                      <Heart size={18} color={item.isFavorite ? "#EF4444" : "#D1D5DB"} fill={item.isFavorite ? "#EF4444" : "none"} />
                     </TouchableOpacity>
                   </View>
-                  
-                  <View style={styles.cardFooter}>
-                    {item.status === 'cancelled' ? (
-                      <View style={styles.cancelledBadge}>
-                        <View style={styles.cancelledDot} />
-                        <Text style={styles.cancelledText}>Cancelled</Text>
-                      </View>
-                    ) : (
-                      <View style={styles.flex1} />
-                    )}
-                    <TouchableOpacity style={styles.actionBtn}>
-                      <Text style={[styles.actionBtnText, item.status === 'cancelled' && styles.textGray]}>
-                        {item.status === 'cancelled' ? 'View Details' : 'Rebook Service'}
-                      </Text>
-                      <ChevronRight size={16} color={item.status === 'cancelled' ? "#6B7280" : "#F97316"} />
-                    </TouchableOpacity>
-                  </View>
-                 </View>
-               </View>
-             );
-          })}
+                );
+              })}
+            </View>
+          </View>
         </ScrollView>
+
+        {/* VOICE MODAL */}
+        <Modal transparent visible={voiceModal} animationType="fade">
+          <View style={styles.voiceOverlay}>
+            <View style={styles.voiceModal}>
+              <TouchableOpacity style={styles.closeBtn} onPress={() => setVoiceModal(false)}><X size={20} /></TouchableOpacity>
+              <Text style={styles.voiceTitle}>Voice Search</Text>
+              <TouchableOpacity style={styles.micButtonModal} onPress={startMockListening}><Mic size={32} color="#fff" /></TouchableOpacity>
+              {listening && <Text style={{marginTop: 10}}>Listening...</Text>}
+            </View>
+          </View>
+        </Modal>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  outerContainer: { flex: 1, backgroundColor: '#ffffff' },
-  flex1: { flex: 1 },
-  // Container to hold the cream-orange background color to match the image
-  headerImageContainer: {
-    height: 250,
-    width: '100%',
-    backgroundColor: '#FFF3E6', 
-  },
-  backgroundImage: {
-    flex: 1,
-    width: '100%',
-  },
-  headerSpacer: { height: '100%' },
+  outerContainer: { flex: 1, backgroundColor: '#FAF9F6' },
+  headerWrapper: { height: 280, width: '100%' },
+  backgroundImage: { flex: 1, width: '100%', justifyContent: 'flex-end' },
+  headerContent: { paddingBottom: 60, paddingHorizontal: 24 },
+  headerTitleText: { fontSize: 34, fontWeight: 'bold', color: '#1E293B' },
+  headerSubtitleText: { fontSize: 16, color: '#64748B' },
+  
   contentArea: { 
     flex: 1, 
-    marginTop: -45, // Reduced overlap so the zoomed-out image stays visible
-    backgroundColor: '#ffffff',
+    marginTop: -40, 
+    backgroundColor: '#FAF9F6',
     borderTopLeftRadius: 40, 
     borderTopRightRadius: 40,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 10,
+    minHeight: 600
   },
   dragIndicator: { width: 44, height: 5, backgroundColor: '#E2E8F0', borderRadius: 3, alignSelf: 'center', marginTop: 14 },
   
-  textHeadingSection: {
-    paddingHorizontal: 24, 
-    paddingTop: 10,
-  },
-  headerTitleText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#3B1E14', 
-    letterSpacing: -0.8,
-  },
-  headerSubtitleText: {
-    fontSize: 16,
-    color: '#6B7280',
-    fontWeight: '500',
-    marginTop: 2,
-  },
+  searchContainer: { paddingHorizontal: 24, marginTop: 20 },
+  searchBar: { flexDirection: 'row', alignItems: 'center', height: 56, borderRadius: 18, backgroundColor: '#fff', paddingHorizontal: 16, elevation: 2, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 5, gap: 10 },
+  searchInput: { flex: 1, fontSize: 16 },
 
-  searchContainer: { 
-    paddingHorizontal: 24, 
-    paddingTop: 15, 
-    paddingBottom: 10 
-  },
-  searchBar: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    height: 56, 
-    borderRadius: 18, 
-    backgroundColor: '#F8FAFC', 
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#F1F5F9'
-  },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 16, color: '#1E293B' },
+  actionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 24, marginTop: 20 },
+  actionHeaderText: { color: '#f97316', fontWeight: 'bold', fontSize: 14 },
+  deleteBtn: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  deleteBtnText: { color: '#EF4444', fontWeight: 'bold', fontSize: 14 },
+
+  listContainer: { paddingHorizontal: 24, paddingTop: 10, paddingBottom: 40 },
+  monthHeader: { fontSize: 11, fontWeight: '800', color: '#94A3B8', marginVertical: 15, textTransform: 'uppercase', letterSpacing: 1.5 },
   
-  tabsWrapper: { marginTop: 10 },
-  tabsScroll: { paddingHorizontal: 24 },
-  rangeTab: { paddingHorizontal: 20, paddingVertical: 10, borderRadius: 25, backgroundColor: '#F8FAFC', marginRight: 12 },
-  activeRangeTab: { backgroundColor: '#F97316' },
-  rangeText: { fontSize: 14, fontWeight: '700', color: '#64748B' },
-  activeRangeText: { color: 'white' },
+  card: { backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, borderWidth: 1, borderColor: '#F1F5F9' },
+  selectedCard: { borderColor: '#f97316', backgroundColor: '#FFF7ED' },
+  cardMain: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   
-  listContainer: { paddingHorizontal: 24, paddingTop: 20, paddingBottom: 130 },
-  monthHeader: { fontSize: 11, fontWeight: '800', color: '#94A3B8', marginBottom: 15, textTransform: 'uppercase', letterSpacing: 1.5 },
-  card: { backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 4, shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 15, borderWidth: 1, borderColor: '#F1F5F9' },
-  cardMain: { flexDirection: 'row', gap: 16 },
-  avatarWrapper: { position: 'relative' },
-  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: '#F1F5F9' }, 
-  grayscale: { opacity: 0.6 },
-  onlineDot: { position: 'absolute', bottom: 2, right: 2, width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: 'white' },
-  cardDetails: { flex: 1, justifyContent: 'center' },
-  nameRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  selectionCircle: { marginRight: 8 },
+  unselectedCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#CBD5E1' },
+
+  avatar: { width: 68, height: 68, borderRadius: 18, backgroundColor: '#F1F5F9' }, 
+  cardDetails: { flex: 1 },
+  nameRow: { flexDirection: 'row', justifyContent: 'space-between' },
   workerName: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
-  serviceName: { fontSize: 14, color: '#F97316', fontWeight: '700', marginTop: 2 },
-  textGray: { color: '#94A3B8' },
-  ratingBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#FEF9C3', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  ratingText: { fontSize: 12, fontWeight: 'bold', color: '#A16207' },
-  metaRow: { flexDirection: 'row', gap: 12, marginTop: 10 },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#F8FAFC', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10 },
-  metaText: { fontSize: 12, fontWeight: '600', color: '#64748B' },
-  favBtn: { paddingTop: 4 },
-  cardFooter: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cancelledBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FEF2F2', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
-  cancelledDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#EF4444' },
-  cancelledText: { fontSize: 11, fontWeight: '800', color: '#B91C1C' },
-  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  actionBtnText: { fontSize: 14, fontWeight: 'bold', color: '#F97316' },
+  serviceName: { fontSize: 13, color: '#f97316', fontWeight: '700' },
+  
+  ratingBox: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 10 },
+  ratingText: { fontSize: 12, fontWeight: 'bold', color: '#475569' },
+
+  metaRow: { flexDirection: 'row', gap: 10, marginTop: 8, flexWrap: 'wrap' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaText: { fontSize: 12, color: '#64748B' },
+  
+  cardFooter: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between' },
+  rebookBtn: { backgroundColor: '#FFF7ED', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 },
+  rebookBtnText: { fontSize: 13, fontWeight: 'bold', color: '#f97316' },
+  reviewBtn: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  reviewBtnText: { fontSize: 13, fontWeight: 'bold', color: '#f97316' },
+
+  voiceOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
+  voiceModal: { width: '85%', backgroundColor: '#fff', borderRadius: 20, padding: 24, alignItems: 'center' },
+  closeBtn: { position: 'absolute', right: 16, top: 16 },
+  voiceTitle: { fontSize: 20, fontWeight: 'bold' },
+  micButtonModal: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#f97316', alignItems: 'center', justifyContent: 'center', marginTop: 20 },
 });
