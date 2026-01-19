@@ -1,36 +1,35 @@
+import { LinearGradient } from 'expo-linear-gradient';
+import {
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Heart,
+  MessageCircle,
+  Mic,
+  Search,
+  Star,
+  Trash2,
+  X
+} from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
   Dimensions,
-  TextInput,
-  StatusBar,
+  Image,
   ImageBackground,
+  KeyboardAvoidingView,
   Modal,
   Platform,
-  KeyboardAvoidingView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { 
-  Search, 
-  Star, 
-  Heart, 
-  Calendar, 
-  Clock, 
-  ChevronRight, 
-  Mic, 
-  X, 
-  MessageCircle, 
-  Trash2,
-  CheckCircle2
-} from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
-const headerImage = require('../../assets/images/History.png');
+const headerImage = require('../../assets/images/History1.png');
 
 const initialHistory = [
   { id: '1', name: 'Ramesh Electrician', service: 'General Electrical Work', rating: 4.5, reviews: 12, date: '22 Dec', time: '03:20 PM', image: 'https://randomuser.me/api/portraits/men/21.jpg', status: 'completed', isFavorite: false, month: 'DECEMBER 2024' },
@@ -94,7 +93,7 @@ export default function HistoryPage() {
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{flexGrow: 1}}>
           {/* BACKGROUND HEADER - Image now scrolls with content */}
           <View style={styles.headerWrapper}>
-            <ImageBackground source={headerImage} style={styles.backgroundImage} resizeMode="cover">
+            <ImageBackground source={headerImage} style={styles.backgroundImage} resizeMode="contain">
               <LinearGradient colors={['rgba(255,255,255,0)', 'rgba(255,243,230,0.8)']} style={StyleSheet.absoluteFillObject} />
             </ImageBackground>
           </View>
@@ -131,11 +130,13 @@ export default function HistoryPage() {
                 )}
             </View>
 
+            {/* HISTORY LIST */}
             <View style={styles.listContainer}>
               {filteredHistory.map((item, index) => {
                 const showMonth = index === 0 || item.month !== filteredHistory[index - 1].month;
                 const isSelected = selectedItems.includes(item.id);
 
+                {/* HISTORY CARD */}
                 return (
                   <View key={item.id}>
                     {showMonth && <Text style={styles.monthHeader}>{item.month}</Text>}
@@ -215,8 +216,8 @@ export default function HistoryPage() {
 
 const styles = StyleSheet.create({
   outerContainer: { flex: 1, backgroundColor: '#FAF9F6' },
-  headerWrapper: { height: 280, width: '100%' },
-  backgroundImage: { flex: 1, width: '100%', justifyContent: 'flex-end' },
+  headerWrapper: { height: 320, width: '100%' },
+  backgroundImage: { flex: 1, width: '110%', height: '100%', justifyContent: 'center' },
   headerContent: { paddingBottom: 60, paddingHorizontal: 24 },
   headerTitleText: { fontSize: 34, fontWeight: 'bold', color: '#1E293B' },
   headerSubtitleText: { fontSize: 16, color: '#64748B' },
@@ -243,24 +244,24 @@ const styles = StyleSheet.create({
   listContainer: { paddingHorizontal: 24, paddingTop: 10, paddingBottom: 40 },
   monthHeader: { fontSize: 11, fontWeight: '800', color: '#94A3B8', marginVertical: 15, textTransform: 'uppercase', letterSpacing: 1.5 },
   
-  card: { backgroundColor: 'white', borderRadius: 24, padding: 16, marginBottom: 16, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, borderWidth: 1, borderColor: '#F1F5F9' },
+  card: { backgroundColor: 'white', borderRadius: 24, padding: 15, marginBottom: 16, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 10, borderWidth: 1, borderColor: '#F1F5F9' },
   selectedCard: { borderColor: '#f97316', backgroundColor: '#FFF7ED' },
   cardMain: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   
   selectionCircle: { marginRight: 8 },
   unselectedCircle: { width: 24, height: 24, borderRadius: 12, borderWidth: 2, borderColor: '#CBD5E1' },
 
-  avatar: { width: 68, height: 68, borderRadius: 18, backgroundColor: '#F1F5F9' }, 
+  avatar: { width: 63, height: 63, borderRadius: 18, backgroundColor: '#F1F5F9' }, 
   cardDetails: { flex: 1 },
   nameRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  workerName: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
+  workerName: { fontSize: 16, fontWeight: 'bold', color: '#1E293B' },
   serviceName: { fontSize: 13, color: '#f97316', fontWeight: '700' },
   
-  ratingBox: { flexDirection: 'row', alignItems: 'center', gap: 4, marginRight: 10 },
+  ratingBox: { flexDirection: 'row', alignItems: 'center', gap: 2, marginRight: 2 },
   ratingText: { fontSize: 12, fontWeight: 'bold', color: '#475569' },
 
   metaRow: { flexDirection: 'row', gap: 10, marginTop: 8, flexWrap: 'wrap' },
-  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   metaText: { fontSize: 12, color: '#64748B' },
   
   cardFooter: { marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#F1F5F9', flexDirection: 'row', justifyContent: 'space-between' },

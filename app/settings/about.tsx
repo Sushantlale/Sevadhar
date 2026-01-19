@@ -64,15 +64,15 @@ export default function AboutPage() {
         <View style={styles.statsCard}>
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>50,000+</Text>
+              <Text style={styles.statNumber}>5000+</Text>
               <Text style={styles.statLabel}>Happy Families</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>10,000+</Text>
+              <Text style={styles.statNumber}>1000+</Text>
               <Text style={styles.statLabel}>Verified Workers</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statNumber}>25+</Text>
+              <Text style={styles.statNumber}>1+</Text>
               <Text style={styles.statLabel}>Cities</Text>
             </View>
             <View style={styles.statItem}>
@@ -150,16 +150,16 @@ export default function AboutPage() {
           </View>
 
           <FounderCard 
-            name="Arjun Mehta" 
+            name="Shree Nivas Kunte" 
             role="Co-Founder & CEO"
             image="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
             bio="Passionate about using technology to organize India's massive informal workforce."
           />
           <FounderCard 
-            name="Priya Sharma" 
-            role="Co-Founder & COO"
+            name="Yogesh Khandke" 
+            role="Founder"
             image="https://cdn-icons-png.flaticon.com/512/3135/3135768.png"
-            bio="Leading operational excellence and worker empowerment initiatives across 25 cities."
+            bio="Leading operational excellence and worker empowerment initiatives across 2 cities."
           />
         </View>
 
@@ -168,19 +168,19 @@ export default function AboutPage() {
           <Text style={styles.sectionTitle}>Our Story</Text>
           <View style={styles.timelineContainer}>
             <TimelineItem 
-              year="2021" 
+              year="2011" 
               title="The Spark" 
               desc="Witnessed the daily struggle of local help finding work during the pandemic. Started with just 10 workers."
             />
             <TimelineItem 
-              year="2022" 
+              year="2024" 
               title="Expanding Horizons" 
-              desc="Launched our tech-first platform with Aadhaar verification. Scaled to 5 major cities."
+              desc="Launched our tech-first platform with Aadhaar verification. Scaled to 1 major cities."
             />
             <TimelineItem 
-              year="2023" 
+              year="2025" 
               title="National Presence" 
-              desc="Reached 10,000+ verified workers and established ourselves as a trusted name in 25+ cities."
+              desc="Reached 1000+ verified workers and established ourselves as a trusted name in 3 cities."
               isLast
             />
           </View>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   logoText: { fontSize: 18, fontWeight: '800', marginLeft: 10, letterSpacing: -0.5 },
   menuBtn: { padding: 5 },
 
-  heroSection: { paddingHorizontal: 24, paddingTop: 40, paddingBottom: 60, alignItems: 'center', backgroundColor: '#f8fafc' },
+  heroSection: { paddingHorizontal: 24, paddingTop: 60, paddingBottom: 60, alignItems: 'center', backgroundColor: '#f8fafc' },
   heroTitle: { fontSize: 32, fontWeight: '900', textAlign: 'center', color: '#0f172a', lineHeight: 40 },
   heroSubtitle: { fontSize: 16, textAlign: 'center', color: '#64748b', marginTop: 15, lineHeight: 24 },
 
@@ -338,10 +338,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', padding: 20, backgroundColor: 'white', 
     borderRadius: 24, marginBottom: 16, borderWidth: 1, borderColor: '#f1f5f9', gap: 15
   },
-  founderImg: { width: 80, height: 80, borderRadius: 40, borderWidth: 2, borderColor: 'rgba(255,122,0,0.1)' },
+  founderImg: { width: 70, height: 70, borderRadius: 40, borderWidth: 2, borderColor: 'rgba(255,122,0,0.1)' },
   founderInfo: { flex: 1 },
   founderHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
-  founderName: { fontSize: 18, fontWeight: '800', color: '#0f172a' },
+  founderName: { fontSize: 17, fontWeight: '800', color: '#0f172a' },
   founderRole: { fontSize: 13, color: '#FF7A00', fontWeight: '700' },
   socialIcons: { flexDirection: 'row', gap: 8 },
   socialCircle: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', justifyContent: 'center', alignItems: 'center' },

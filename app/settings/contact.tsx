@@ -1,29 +1,29 @@
+import { useRouter } from 'expo-router';
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  Mail,
+  MapPin,
+  MessageCircle,
+  Phone
+} from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-  StyleSheet,
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Linking,
   Alert,
   KeyboardAvoidingView,
-  Platform
+  Linking,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
-  MessageCircle, 
-  ChevronDown, 
-  ChevronUp,
-  ArrowLeft 
-} from 'lucide-react-native';
-import { useRouter } from 'expo-router';
 
 export default function ContactUsPage() {
   const router = useRouter();
@@ -43,15 +43,15 @@ export default function ContactUsPage() {
   const faqs = [
     {
       question: "How do I track my service?",
-      answer: "You can track your service in real-time through the 'My Bookings' section in the app sidebar."
+      answer: "You can track your service in real-time through the 'History' page in the app Navigation bar."
     },
     {
-      question: "What is your refund policy?",
-      answer: "Refunds are initiated within 24 hours if the service is cancelled by the provider or if there's a verified quality issue."
+      question: "Are we responsible for refund?",
+      answer: "No, Sevadhar is not responsible for any refunds. Please contact the service provider directly for refund-related queries."
     },
     {
-      question: "Can I change my service time?",
-      answer: "Yes, you can reschedule up to 2 hours before the service starts without any extra charges."
+      question: "Can I change my service availiability everyday?",
+      answer: "Yes, you can change through profile ."
     }
   ];
 
@@ -107,7 +107,7 @@ export default function ContactUsPage() {
             <ContactCard 
               icon={<MapPin size={22} color="#F5821F" />} 
               title="Address" 
-              value="Mumbai, Maharashtra" 
+              value="Khopoli, Maharashtra" 
               subValue="India" 
             />
             <ContactCard 
@@ -231,7 +231,7 @@ const ContactCard = ({ icon, title, value, subValue }: { icon: any, title: strin
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF9F6' },
-  header: { paddingHorizontal: 20, paddingVertical: 10 },
+  header: { paddingHorizontal: 20, paddingVertical: 10 ,paddingTop: Platform.OS === 'web' ? 12 : 50, flexDirection: 'row', alignItems: 'center' },
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
   
