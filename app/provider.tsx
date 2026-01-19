@@ -29,7 +29,9 @@ import {
   View
 } from 'react-native';
 
+
 const { width } = Dimensions.get('window');
+
 
 const sevaCategories = [
   { id: 'household', name: 'Household Help & Cleaning' },
@@ -52,9 +54,11 @@ const sevaCategories = [
   { id: 'agriculture', name: 'Agriculture & Allied' },
 ];
 
+
 export default function ProviderSignup() {
   const router = useRouter();
   const TOTAL_STEPS = 4;
+
 
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
@@ -62,7 +66,9 @@ export default function ProviderSignup() {
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+
   const recordingRef = useRef<Audio.Recording | null>(null);
+
 
   const [formData, setFormData] = useState({
     aadharFront: null as string | null,
@@ -78,6 +84,7 @@ export default function ProviderSignup() {
     agreeTerms: false,
   });
 
+
   const pickImage = async (field: 'aadharFront' | 'aadharBack') => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
@@ -85,15 +92,18 @@ export default function ProviderSignup() {
       return;
     }
 
+
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       quality: 0.7,
     });
 
+
     if (!result.canceled) {
       setFormData({ ...formData, [field]: result.assets[0].uri });
     }
   };
+
 
   const startRecording = async () => {
     try {
@@ -108,11 +118,13 @@ export default function ProviderSignup() {
     }
   };
 
+
   const stopRecording = async () => {
     setIsRecording(false);
     await recordingRef.current?.stopAndUnloadAsync();
     setRecordingUri(recordingRef.current?.getURI() || null);
   };
+
 
   const handleNext = () => {
     if (step === 1 && (!formData.aadharFront || !formData.aadharBack)) {
@@ -120,20 +132,24 @@ export default function ProviderSignup() {
       return;
     }
 
+
     if (step === 2 && (!formData.fullName || !formData.dob || !formData.phone || !formData.homeAddress)) {
       Alert.alert("Required", "Please fill all mandatory fields marked with *");
       return;
     }
+
 
     if (step === 3 && !formData.selectedSeva) {
       Alert.alert("Required", "Please select one service category");
       return;
     }
 
+
     if (step < TOTAL_STEPS) {
       setStep(prev => prev + 1);
     }
   };
+
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -147,16 +163,20 @@ export default function ProviderSignup() {
         </View>
       </View>
 
+
       <View style={styles.progressContainer}>
         <View style={[styles.progressBar, { width: `${(step / TOTAL_STEPS) * 100}%` }]} />
       </View>
 
+
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
 
         {/* STEP 2 DOB FIX */}
         {step === 2 && (
           <View>
             <Text style={styles.stepTitle}>Personal Details</Text>
+
 
             <View style={styles.inputWrapper}>
               <User size={20} color="#9CA3AF" style={styles.icon} />
@@ -166,6 +186,7 @@ export default function ProviderSignup() {
                 onChangeText={(v) => setFormData({ ...formData, fullName: v })}
               />
             </View>
+
 
             <View style={styles.inputWrapper}>
               <TouchableOpacity onPress={() => setShowDatePicker(true)}>
@@ -186,6 +207,7 @@ export default function ProviderSignup() {
               />
             </View>
 
+
             <View style={[styles.inputWrapper, { height: 100, alignItems: 'flex-start', paddingTop: 15 }]}>
               <MapPin size={20} color="#9CA3AF" style={styles.icon} />
               <TextInput
@@ -195,6 +217,7 @@ export default function ProviderSignup() {
                 onChangeText={(v) => setFormData({ ...formData, homeAddress: v })}
               />
             </View>
+
 
             <View style={styles.inputWrapper}>
               <Phone size={20} color="#9CA3AF" style={styles.icon} />
@@ -206,6 +229,7 @@ export default function ProviderSignup() {
               />
             </View>
 
+
             <View style={styles.inputWrapper}>
               <Lock size={20} color="#9CA3AF" style={styles.icon} />
               <TextInput placeholder="Password *" style={styles.input} secureTextEntry />
@@ -213,7 +237,9 @@ export default function ProviderSignup() {
           </View>
         )}
 
+
       </ScrollView>
+
 
       {showDatePicker && (
         <DateTimePicker
@@ -234,6 +260,7 @@ export default function ProviderSignup() {
     </SafeAreaView>
   );
 }
+
 
 /* styles remain unchanged */
 const styles = StyleSheet.create({

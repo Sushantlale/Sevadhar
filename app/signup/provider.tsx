@@ -54,7 +54,9 @@ import {
   Users
 } from "lucide-react-native";
 
+
 const { width } = Dimensions.get("window");
+
 
 // --- FULL DATA STRUCTURE ---
 const ALL_SERVICES = {
@@ -180,12 +182,15 @@ const ALL_SERVICES = {
   ],
 };
 
+
 type CategoryType = "Local Workers" | "Professional Services" | "Shops";
+
 
 export default function ProviderSignup() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const totalSteps = 5;
+
 
   const [formData, setFormData] = useState({
     aadharFront: null as string | null,
@@ -197,8 +202,10 @@ export default function ProviderSignup() {
     voiceUri: null as string | null,
   });
 
+
   const [activeTab, setActiveTab] = useState<CategoryType>("Local Workers");
   const [searchQuery, setSearchQuery] = useState("");
+
 
   const [isFrontSaved, setIsFrontSaved] = useState(false);
   const [isBackSaved, setIsBackSaved] = useState(false);
@@ -211,6 +218,7 @@ export default function ProviderSignup() {
   const [isAgreed, setIsAgreed] = useState(false);
   const recordingRef = useRef<Audio.Recording | null>(null);
 
+
   const formatDate = (date: Date) => {
     const d = String(date.getDate()).padStart(2, "0");
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -218,19 +226,23 @@ export default function ProviderSignup() {
     return `${d}/${m}/${y}`;
   };
 
+
   const pickImage = async (field: "aadharFront" | "aadharBack", fromCamera: boolean) => {
     const permission = fromCamera
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
+
 
     if (!permission.granted) {
       Alert.alert("Permission required", "Camera/Gallery access is needed.");
       return;
     }
 
+
     const result = fromCamera
       ? await ImagePicker.launchCameraAsync({ quality: 0.7, allowsEditing: true, aspect: [3, 2] })
       : await ImagePicker.launchImageLibraryAsync({ quality: 0.7, allowsEditing: true, aspect: [3, 2] });
+
 
     if (!result.canceled) {
       setFormData({ ...formData, [field]: result.assets[0].uri });
@@ -238,6 +250,7 @@ export default function ProviderSignup() {
       if (field === "aadharBack") setIsBackSaved(false);
     }
   };
+
 
   const sendOtp = () => {
     if (formData.phone.length !== 10) {
@@ -248,6 +261,7 @@ export default function ProviderSignup() {
     Alert.alert("OTP Sent", "Your verification code is 123456");
   };
 
+
   const verifyOtp = () => {
     if (otp === "123456") {
       setIsOtpVerified(true);
@@ -256,6 +270,7 @@ export default function ProviderSignup() {
       Alert.alert("Error", "Invalid OTP");
     }
   };
+
 
   const startRecording = async () => {
     try {
@@ -270,6 +285,7 @@ export default function ProviderSignup() {
     }
   };
 
+
   const stopRecording = async () => {
     setIsRecording(false);
     try {
@@ -281,28 +297,43 @@ export default function ProviderSignup() {
     }
   };
 
+
   const toggleService = (serviceName: string) => {
-    setFormData((prev) => {
-      const isSelected = prev.selectedServices.includes(serviceName);
-      if (isSelected) {
-        return { ...prev, selectedServices: prev.selectedServices.filter((s) => s !== serviceName) };
-      } else {
-        return { ...prev, selectedServices: [...prev.selectedServices, serviceName] };
-      }
-    });
-  };
+  setFormData((prev) => {
+    const isSelected = prev.selectedServices.includes(serviceName);
+
+    if (isSelected) {
+      return {
+        ...prev,
+        selectedServices: prev.selectedServices.filter((s) => s !== serviceName),
+      };
+    }
+
+    if (prev.selectedServices.length >= 2) {
+      Alert.alert("Limit Reached", "You can select a maximum of 2 services only.");
+      return prev;
+    }
+
+    return {
+      ...prev,
+      selectedServices: [...prev.selectedServices, serviceName],
+    };
+  });
+};
 
   const filteredCategories = useMemo(() => {
     const currentCategories = ALL_SERVICES[activeTab];
     if (!searchQuery.trim()) return currentCategories;
 
+
     return currentCategories.map(cat => ({
       ...cat,
-      services: cat.services.filter(s => 
+      services: cat.services.filter(s =>
         s.toLowerCase().includes(searchQuery.toLowerCase())
       )
     })).filter(cat => cat.services.length > 0);
   }, [activeTab, searchQuery]);
+
 
   const handleNext = () => {
     if (step === 1) {
@@ -345,6 +376,23 @@ export default function ProviderSignup() {
     }
     setStep(step + 1);
   };
+  const handleDobChange = (text: string) => {
+  // Remove everything except numbers
+  let cleaned = text.replace(/\D/g, "");
+
+  // Limit to 8 digits (DDMMYYYY)
+  if (cleaned.length > 8) cleaned = cleaned.slice(0, 8);
+
+  let formatted = cleaned;
+
+  if (cleaned.length > 4) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
+  } else if (cleaned.length > 2) {
+    formatted = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  }
+
+  setFormData({ ...formData, dob: formatted });
+};
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -359,11 +407,14 @@ export default function ProviderSignup() {
         <Text style={styles.headerStepText}>Step {step} of 5</Text>
       </View>
 
+
       <View style={styles.progressBarBg}>
         <View style={[styles.progressBarFill, { width: `${(step / totalSteps) * 100}%` }]} />
       </View>
 
+
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+
 
         {/* STEP 1: AADHAAR */}
         {step === 1 && (
@@ -410,6 +461,7 @@ export default function ProviderSignup() {
             </View>
         )}
 
+
         {/* STEP 2: PERSONAL INFO */}
         {step === 2 && (
              <View>
@@ -422,11 +474,13 @@ export default function ProviderSignup() {
                <Text style={styles.inputLabel}>DATE OF BIRTH <Text style={{ color: 'red' }}>*</Text></Text>
                <View style={styles.dateInputContainer}>
                  <TextInput
-                   placeholder="DD/MM/YYYY"
-                   value={formData.dob}
-                   style={[styles.input, { marginBottom: 0, paddingRight: 50 }]}
-                   onChangeText={(v) => setFormData({ ...formData, dob: v })}
-                 />
+                  placeholder="DD/MM/YYYY"
+                  value={formData.dob}
+                  keyboardType="number-pad"
+                  maxLength={10}
+                  style={[styles.input, { marginBottom: 0, paddingRight: 50 }]}
+                  onChangeText={handleDobChange}
+                />
                  <TouchableOpacity style={styles.rightIcon} onPress={() => setShowDatePicker(true)}>
                    <Calendar size={20} color="#94A3B8" />
                  </TouchableOpacity>
@@ -461,6 +515,7 @@ export default function ProviderSignup() {
            </View>
         )}
 
+
         {/* STEP 3: SELECT SERVICES */}
         {step === 3 && (
           <View>
@@ -469,9 +524,10 @@ export default function ProviderSignup() {
               <Text style={styles.selectionSubtitle}>Choose from Local Workers, Professional Services, or Shops.</Text>
             </View>
 
+
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterTabContainer}>
               {(["Local Workers", "Professional Services", "Shops"] as CategoryType[]).map((tab) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                     key={tab}
                     onPress={() => { setActiveTab(tab); setSearchQuery(""); }}
                     style={[styles.filterTab, activeTab === tab && styles.filterTabActive]}
@@ -481,16 +537,18 @@ export default function ProviderSignup() {
               ))}
             </ScrollView>
 
+
             <View style={styles.searchBarContainer}>
               <Search size={20} color="#94A3B8" style={styles.searchIcon} />
-              <TextInput 
-                placeholder="Search skills (e.g. Plumber, Maid)" 
+              <TextInput
+                placeholder="Search skills (e.g. Plumber, Maid)"
                 style={styles.searchBarInput}
                 placeholderTextColor="#94A3B8"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
               />
             </View>
+
 
             {filteredCategories.map((cat) => (
               <View key={cat.id} style={styles.categorySection}>
@@ -502,8 +560,8 @@ export default function ProviderSignup() {
                   {cat.services.map((service) => {
                     const isSelected = formData.selectedServices.includes(service);
                     return (
-                      <TouchableOpacity 
-                        key={service} 
+                      <TouchableOpacity
+                        key={service}
                         onPress={() => toggleService(service)}
                         style={[styles.chip, isSelected && styles.chipActive]}
                       >
@@ -517,6 +575,7 @@ export default function ProviderSignup() {
             ))}
           </View>
         )}
+
 
         {/* STEP 4: VOICE RECORDING */}
         {step === 4 && (
@@ -552,11 +611,13 @@ export default function ProviderSignup() {
           </View>
         )}
 
+
         {/* STEP 5: REVIEW */}
         {step === 5 && (
           <View style={{ flex: 1 }}>
             <Text style={styles.sectionTitleLarge}>Review & Submit</Text>
             <Text style={styles.sectionSubtitle}>Double-check details before completing registration.</Text>
+
 
             <View style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
@@ -573,6 +634,7 @@ export default function ProviderSignup() {
               </View>
             </View>
 
+
             <View style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>Selected Services</Text>
@@ -587,6 +649,7 @@ export default function ProviderSignup() {
               </View>
             </View>
 
+
             <View style={styles.reviewCard}>
               <View style={styles.reviewHeader}>
                 <Text style={styles.reviewTitle}>Voice Introduction</Text>
@@ -598,6 +661,7 @@ export default function ProviderSignup() {
                 <CheckCircle2 size={20} color="#22C55E" style={{ marginLeft: 'auto' }} />
               </View>
             </View>
+
 
             <Text style={styles.documentTitle}>Document Status</Text>
             <View style={styles.docGrid}>
@@ -613,6 +677,7 @@ export default function ProviderSignup() {
               </View>
             </View>
 
+
             <TouchableOpacity style={styles.declarationRow} onPress={() => setIsAgreed(!isAgreed)}>
               <View style={[styles.checkbox, isAgreed && styles.checkboxActive]}>{isAgreed && <Check size={14} color="#FFF" />}</View>
               <Text style={styles.declarationText}>I agree to the <Text style={styles.linkText}>Terms</Text> and <Text style={styles.linkText}>Privacy Policy</Text>.</Text>
@@ -620,16 +685,19 @@ export default function ProviderSignup() {
           </View>
         )}
 
+
         <TouchableOpacity style={[styles.continueBtn, (step === 5 && !isAgreed) && { opacity: 0.6 }]} onPress={handleNext}>
           <Text style={styles.continueBtnText}>{step === 5 ? "Complete Registration" : "Continue"}</Text>
           <ArrowRight size={20} color="#FFF" />
         </TouchableOpacity>
+
 
         <View style={{ height: 60 }} />
       </ScrollView>
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: "#FAF9F6" },
@@ -640,7 +708,7 @@ const styles = StyleSheet.create({
   progressBarFill: { height: 4, backgroundColor: "#FF7A00" },
   scrollContainer: { padding: 20 },
   sectionTitle: { fontSize: 24, fontWeight: "800", textAlign: "center", marginBottom: 25, color: '#1E293B' },
-  
+ 
   // Selection Screen Specific Styles
   selectionTitleContainer: { marginBottom: 24 },
   selectionTitleMain: { fontSize: 32, fontWeight: "800", color: "#1E293B" },
@@ -662,6 +730,7 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: "#FFF7ED", borderColor: "#FF7A00" },
   chipText: { fontSize: 14, fontWeight: "500", color: "#475569" },
   chipTextActive: { color: "#FF7A00", fontWeight: "700" },
+
 
   // General Styles
   sectionTitleLarge: { fontSize: 32, fontWeight: "800", color: '#181411', marginBottom: 8 },
