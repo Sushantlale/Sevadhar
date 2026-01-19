@@ -413,10 +413,10 @@ const handleSearchSubmit = (query: string) => {
             {/* PROMOTIONAL BANNER */}
             <LinearGradient colors={['#FFA726', '#FF9100']} style={styles.promoBanner}>
               <View style={styles.promoTextCol}>
-                <Text style={styles.promoTitle}>20% OFF</Text>
-                <Text style={styles.promoSub}>on your first booking</Text>
+                <Text style={styles.promoTitle}>Refer and Earn SevaCoins</Text>
+                <Text style={styles.promoSub}>on your first Reference</Text>
                 <View style={styles.promoCodeBox}>
-                  <Text style={styles.promoCode}>FIRST20</Text>
+                  <Text style={styles.promoCode}>50 Sevacoins</Text>
                 </View>
               </View>
               <View style={styles.promoIconCol}>
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
   promoBanner: { borderRadius: 20, padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 25 },
   promoTextCol: { flex: 2 },
   promoIconCol: { flex: 1, alignItems: 'flex-end' },
-  promoTitle: { fontSize: 32, fontWeight: '900', color: '#FFF' },
+  promoTitle: { fontSize: 25, fontWeight: '900', color: '#FFF' },
   promoSub: { fontSize: 14, color: '#FFF', opacity: 0.9, marginBottom: 10 },
   promoCodeBox: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, alignSelf: 'flex-start', borderWidth: 1, borderColor: 'rgba(255,255,255,0.3)' },
   promoCode: { color: '#FFF', fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
@@ -827,7 +827,7 @@ const styles = StyleSheet.create({
   viewAll: { color: '#FF9100', fontSize: 14, fontWeight: '600' },
 
   recScrollArea: { paddingBottom: 10 },
-  recBannerHorizontal: { width: width * 0.85, height: 160, borderRadius: 20, overflow: 'hidden', marginRight: 15 },
+  recBannerHorizontal: { width: width * 0.75, height: 160, borderRadius: 20, overflow: 'hidden', marginRight: 15 },
   recImg: { width: '100%', height: '100%' },
   recOverlay: { ...StyleSheet.absoluteFillObject },
   recTag: { position: 'absolute', top: 12, left: 12, backgroundColor: '#FF9100', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
   recMainText: { color: '#FFF', fontSize: 20, fontWeight: 'bold' },
 
   hScroll: { marginBottom: 20 },
-  circleItem: { width: 85, alignItems: 'center', marginRight: 15 },
+  circleItem: { width: 85, alignItems: 'center', marginRight: 12 },
   circleBorder: { width: 65, height: 65, borderRadius: 35, borderWidth: 2, borderColor: 'transparent', padding: 2 },
   activeCircle: { borderColor: '#FF9100' },
   circleImg: { width: '100%', height: '100%', borderRadius: 35 },
@@ -862,7 +862,7 @@ const styles = StyleSheet.create({
   workerRating: { fontSize: 14, fontWeight: 'bold', color: '#FF9100', marginLeft: 4 },
   workerCalls: { fontSize: 10, color: '#6B7280', marginTop: 2 },
 
-  popularWrapper: { position: 'relative', paddingBottom: 40 },
+  popularWrapper: { position: 'relative', paddingBottom: 50 },
   popularScroll: { paddingRight: 20 },
   popularCard: { width: width * 0.45, marginRight: 15 },
   popularImg: { width: '100%', height: 130, borderRadius: 20 },
@@ -876,7 +876,7 @@ const styles = StyleSheet.create({
   indicatorTrack: { height: 4, backgroundColor: '#E5E7EB', width: 100, alignSelf: 'center', marginTop: 15, borderRadius: 2, overflow: 'hidden' },
   indicatorThumb: { height: '100%', width: 40, backgroundColor: '#FF9100', borderRadius: 2 },
 
-  sosBtn: { position: 'absolute', bottom: 20, right: 20, backgroundColor: '#EF4444', width: 60, height: 60, borderRadius: 30, justifyContent: 'center', alignItems: 'center', elevation: 5 },
+  sosBtn: { position: 'absolute', bottom: 90, right: 20, backgroundColor: '#EF4444', width: 55, height: 55, borderRadius: 30, justifyContent: 'center', alignItems: 'center', elevation: 5 },
   row: { flexDirection: 'row', alignItems: 'center' },
   dropdownOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'center', alignItems: 'center' },
   dropdownCard: { width: width * 0.8, backgroundColor: '#FFF', borderRadius: 20, padding: 20, elevation: 5 },
